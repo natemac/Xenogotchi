@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: XENOGOTCHI
+      - generic [ref=e6]: PHASE I
+    - generic [ref=e7]:
+      - button "MAIL" [ref=e8] [cursor=pointer]:
+        - generic [ref=e12]: MAIL
+      - button "♥ VITALS" [ref=e14] [cursor=pointer]:
+        - generic [ref=e16]: ♥
+        - generic [ref=e17]: VITALS
+      - button "CODEX" [ref=e19] [cursor=pointer]:
+        - generic [ref=e22]: CODEX
+      - button "OPTS" [ref=e24] [cursor=pointer]:
+        - generic [ref=e27]: OPTS
+      - button "SAVE" [ref=e29] [cursor=pointer]:
+        - generic [ref=e32]: SAVE
+  - generic [ref=e89]:
+    - generic [ref=e90]:
+      - generic [ref=e91]: WY-SECCOMM v4.1 // MESSAGE
+      - button "◀ BACK" [ref=e92] [cursor=pointer]
+    - generic [ref=e93]:
+      - generic [ref=e94]: "FROM: BIOPET.DIV@WEYLAND-YUTANI.COM"
+      - generic [ref=e95]: "TO: EMPLOYEE"
+      - generic [ref=e96]: "SUBJ: PROGRAM ENROLLMENT — MANDATORY READ"
+    - generic [ref=e98]: WEYLAND-YUTANI CORP BIOPET DIVISI
+    - generic [ref=e100]:
+      - generic [ref=e101]: "ENCRYPTION: STANDARD"
+      - generic [ref=e102]: "CLASSIFICATION: EMPLOYEE-GRADE"

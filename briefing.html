@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XENO-GOTCHI — BRIEFING</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green:     #3cff3c;
+      --green-dim: #1f6b1f;
+      --green-glow: rgba(60, 255, 60, 0.25);
+      --black:     #000;
+      --yellow:    #ffff00;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--green);
+      font-family: 'Press Start 2P', monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── SCANLINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.18) 2px,
+        rgba(0,0,0,0.18) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* ── STARFIELD ── */
+    #stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── TERMINAL CONTAINER ── */
+    .terminal {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 480px;
+      padding: 0 16px;
+    }
+
+    /* ── CHROME BARS ── */
+    .term-chrome {
+      border: 1px solid var(--green-dim);
+      border-bottom: none;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .term-chrome-label {
+      font-size: 5px;
+      letter-spacing: 2px;
+      color: var(--green-dim);
+      text-transform: uppercase;
+    }
+
+    .term-chrome-status {
+      font-size: 5px;
+      letter-spacing: 1px;
+      color: var(--green-dim);
+    }
+
+    /* ── EMAIL HEADERS ── */
+    .term-headers {
+      border-left: 1px solid var(--green-dim);
+      border-right: 1px solid var(--green-dim);
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--green-dim);
+    }
+
+    .term-header-row {
+      font-size: 5px;
+      letter-spacing: 1px;
+      color: var(--green-dim);
+      line-height: 2.4;
+      text-transform: uppercase;
+    }
+
+    .term-header-row span {
+      color: var(--green);
+      opacity: 0.7;
+    }
+
+    /* ── EMAIL BODY ── */
+    .term-body {
+      border-left: 1px solid var(--green-dim);
+      border-right: 1px solid var(--green-dim);
+      border-bottom: 1px solid var(--green-dim);
+      padding: 18px 12px 22px;
+      min-height: 260px;
+      position: relative;
+    }
+
+    #output {
+      font-size: 7px;
+      line-height: 2.4;
+      letter-spacing: 1px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow: 0 0 6px var(--green-glow);
+    }
+
+    /* ── BLOCK CURSOR ── */
+    #cursor {
+      display: inline-block;
+      width: 8px;
+      height: 12px;
+      background: var(--green);
+      vertical-align: text-bottom;
+      margin-left: 1px;
+      animation: blink-cur 0.7s step-end infinite;
+      box-shadow: 0 0 6px var(--green-glow);
+    }
+
+    @keyframes blink-cur {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── TAP TO CONTINUE ── */
+    #tapContinue {
+      display: none;
+      margin-top: 22px;
+      font-size: 7px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      text-align: center;
+      animation: blink 1s step-end infinite;
+      text-shadow: 0 0 8px rgba(255,255,0,0.4);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── FOOTER CHROME ── */
+    .term-footer {
+      border-left: 1px solid var(--green-dim);
+      border-right: 1px solid var(--green-dim);
+      border-bottom: 1px solid var(--green-dim);
+      padding: 4px 10px;
+      font-size: 4px;
+      letter-spacing: 2px;
+      color: var(--green-dim);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="terminal">
+
+  <div class="term-chrome">
+    <span class="term-chrome-label">WY-SECCOMM v4.1 // BIOPET DIV</span>
+    <span class="term-chrome-status" id="timestamp"></span>
+  </div>
+
+  <div class="term-headers">
+    <div class="term-header-row">FROM:&nbsp;&nbsp;&nbsp;<span>BIOPET.DIV@WEYLAND-YUTANI.COM</span></div>
+    <div class="term-header-row">TO:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="employeeId"></span></div>
+    <div class="term-header-row">SUBJ:&nbsp;&nbsp;&nbsp;<span>PROGRAM ENROLLMENT — MANDATORY READ</span></div>
+  </div>
+
+  <div class="term-body">
+    <div id="output"></div><span id="cursor"></span>
+    <div id="tapContinue">— TAP TO CONTINUE —</div>
+  </div>
+
+  <div class="term-footer">
+    <span>ENCRYPTION: STANDARD</span>
+    <span>CLASSIFICATION: EMPLOYEE-GRADE</span>
+  </div>
+
+</div>
+
+<script>
+  /* ── STARFIELD ── */
+  const canvas = document.getElementById('stars');
+  const ctx    = canvas.getContext('2d');
+  let stars    = [];
+
+  function resizeCanvas() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 120; i++) {
+      stars.push({
+        x:     Math.random() * canvas.width,
+        y:     Math.random() * canvas.height,
+        size:  Math.random() < 0.8 ? 1 : 2,
+        speed: Math.random() * 0.3 + 0.05,
+        bright: Math.random()
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const s of stars) {
+      const alpha = 0.3 + s.bright * 0.7;
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size);
+      s.y += s.speed;
+      if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  resizeCanvas();
+  initStars();
+  drawStars();
+  window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+  /* ── HEADER METADATA ── */
+  // Generate a plausible 2122 timestamp
+  const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+  const m = months[Math.floor(Math.random() * 12)];
+  const d = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+  const h = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+  const mn = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+  const s = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+  document.getElementById('timestamp').textContent = `2122.${m}.${d} ${h}:${mn}:${s}`;
+
+  // Randomized employee ID
+  const eid = 'EMP-' + String(Math.floor(Math.random() * 89999) + 10000);
+  document.getElementById('employeeId').textContent = eid;
+
+  /* ── MESSAGE ── */
+  const MESSAGE =
+`WEYLAND-YUTANI CORP
+BIOPET DIVISION — INTERACTIVE TRAINING TOOL
+
+WELCOME, EMPLOYEE.
+
+You have been selected for the BIOPET
+Division. This is a positive outcome.
+
+Selection criteria included your
+dedication, work ethic, and
+{RANDOMIZED PERFORMANCE TRAIT#3}.
+
+You will oversee the development of a
+company biopet through feeding,
+training, and guided interaction.
+
+With proper care, your specimen may
+reach full maturity.
+
+With improper care, your specimen may
+still reach full maturity.
+
+Both outcomes are useful.`;
+
+  /* ── TYPEWRITER ── */
+  const output      = document.getElementById('output');
+  const cursorEl    = document.getElementById('cursor');
+  const tapContinue = document.getElementById('tapContinue');
+
+  const CHAR_DELAY = 26;   // ms per character
+  const LINE_DELAY = 160;  // extra ms per newline
+
+  let charIndex = 0;
+  let done      = false;
+  let timer     = null;
+
+  function typeNext() {
+    if (charIndex >= MESSAGE.length) {
+      finish();
+      return;
+    }
+    const ch = MESSAGE[charIndex++];
+    output.textContent += ch;
+    timer = setTimeout(typeNext, ch === '\n' ? LINE_DELAY : CHAR_DELAY);
+  }
+
+  function finish() {
+    done = true;
+    cursorEl.style.display = 'none';
+    tapContinue.style.display = 'block';
+  }
+
+  function skipOrContinue() {
+    if (!done) {
+      clearTimeout(timer);
+      output.textContent = MESSAGE;
+      finish();
+    } else {
+      window.location.href = 'phase1.html';
+    }
+  }
+
+  document.addEventListener('keydown',     skipOrContinue);
+  document.addEventListener('pointerdown', skipOrContinue);
+
+  // Brief pause before typing starts
+  setTimeout(typeNext, 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{"type":"server-started","port":63047,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63047","screen_dir":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content","state_dir":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/state"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content/taskbar-position.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content/taskbar-items.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content/app-architecture.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content/email-inbox.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/59457-1776037194/content/waiting-1.html"}
+{"type":"server-stopped","reason":"idle timeout"}

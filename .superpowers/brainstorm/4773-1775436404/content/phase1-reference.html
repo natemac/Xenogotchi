@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 1 Reference — Arkanoid Base</title>
+  <style>
+    :root {
+      --w: 448px;
+      --h: 480px;
+      --bg-dark: #00152b;
+      --bg-line: #0060ff;
+      --steel-light: #d8d8d8;
+      --steel-mid: #9a9a9a;
+      --steel-dark: #666;
+      --yellow: #d5c81b;
+      --yellow-line: #8a7e00;
+      --orange: #f5821f;
+      --cyan: #5ce7ff;
+      --green: #3cff3c;
+      --red: #ff4a3c;
+      --blue: #78bcff;
+      --pink: #ff76ef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 24px;
+      padding: 24px;
+      background: #111;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h2 { color: #fff; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin: 0; text-align: center; }
+    .sub { color: #888; font-size: 11px; letter-spacing: 1px; text-align: center; margin: 0; }
+
+    .layout {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .panel { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .panel-label { color: #ff0; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-family: monospace; }
+
+    /* ── GAME SCREEN ── */
+    .game {
+      position: relative;
+      width: var(--w);
+      height: var(--h);
+      overflow: hidden;
+      border: 4px solid #222;
+      image-rendering: pixelated;
+      background:
+        repeating-linear-gradient(90deg, var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        repeating-linear-gradient(0deg,  var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        var(--bg-dark);
+    }
+    .score {
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+      text-align: center; font-weight: 700; line-height: 1; z-index: 5;
+      text-shadow: 2px 2px 0 #000;
+    }
+    .score .label { color: #ff4a1f; font-size: 18px; letter-spacing: 1px; }
+    .score .value { color: white; font-size: 22px; margin-top: 2px; }
+    .lives {
+      position: absolute; top: 8px; left: 42px;
+      display: flex; gap: 6px; z-index: 5;
+    }
+    .life {
+      width: 10px; height: 18px;
+      border-radius: 50% 50% 45% 45%;
+      background: white; position: relative;
+    }
+    .life::after {
+      content: ""; position: absolute;
+      left: 3px; bottom: -5px;
+      width: 4px; height: 7px;
+      background: white; border-radius: 0 0 50% 50%;
+    }
+    .rail {
+      position: absolute; top: 0; width: 15px; height: 100%;
+      background: linear-gradient(90deg, var(--steel-dark), var(--steel-light), var(--steel-mid), var(--steel-light), var(--steel-dark));
+      z-index: 3;
+    }
+    .rail.left { left: 0; } .rail.right { right: 0; }
+    .rail::before {
+      content: ""; position: absolute; inset: 0;
+      background: repeating-linear-gradient(180deg, rgba(255,255,255,.2) 0 14px, rgba(0,0,0,.35) 14px 16px, rgba(255,255,255,.1) 16px 30px, rgba(0,0,0,.45) 30px 32px);
+      mix-blend-mode: multiply;
+    }
+    .top-pipes {
+      position: absolute; top: 24px; left: 12px; right: 12px; height: 18px; z-index: 2;
+    }
+    .pipe-seg {
+      position: absolute; top: 0; height: 14px; width: 115px;
+      background: linear-gradient(180deg, #e4e4e4, #9f9f9f 45%, #d8d8d8 46%, #7d7d7d 100%);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.35);
+    }
+    .pipe-seg:nth-child(1) { left: 0; } .pipe-seg:nth-child(2) { right: 0; }
+    .top-eggs {
+      position: absolute; top: 44px; left: 62px; right: 62px;
+      display: flex; justify-content: space-between; z-index: 4;
+    }
+    .egg {
+      width: 28px; height: 40px;
+      border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
+      box-shadow: inset -4px -6px 0 rgba(0,0,0,.18), inset 4px 6px 0 rgba(255,255,255,.08);
+    }
+    .egg.orange { background: var(--orange); }
+    .egg.cyan   { background: var(--cyan); }
+    .egg.green  { background: var(--green); }
+    .brick-grid {
+      position: absolute; top: 78px; left: 42px; right: 42px;
+      display: grid; grid-template-columns: repeat(12, 1fr);
+      gap: 1px; z-index: 2;
+    }
+    .brick {
+      aspect-ratio: 1.9 / 1;
+      background: var(--yellow);
+      border: 1px solid var(--yellow-line);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.18);
+    }
+    .capsules {
+      position: absolute; top: 230px; left: 55px; right: 55px;
+      display: flex; justify-content: space-between; z-index: 4;
+    }
+    .capsule { position: relative; width: 28px; height: 90px; }
+    .capsule .core {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      top: 0; width: 18px; height: 100%;
+      background: linear-gradient(90deg, #7d7d7d, #dfdfdf 25%, #f8f8f8 50%, #d3d3d3 75%, #8a8a8a);
+      border: 1px solid #7a7a7a;
+    }
+    .capsule .band {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      width: 24px; height: 14px;
+      border: 1px solid rgba(0,0,0,.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+    }
+    .capsule .band.top { top: 2px; } .capsule .band.bottom { bottom: 2px; }
+    .capsule.orange .band { background: var(--orange); }
+    .capsule.cyan   .band { background: var(--cyan); }
+    .capsule.green  .band { background: var(--green); }
+    .capsule.red    .band { background: var(--red); }
+    .capsule.blue   .band { background: var(--blue); }
+    .capsule.pink   .band { background: var(--pink); }
+    .paddle {
+      position: absolute; bottom: 46px; left: 50%; transform: translateX(-50%);
+      width: 46px; height: 14px;
+      background: linear-gradient(180deg, #ffa65c, #e86615);
+      border: 1px solid #8f3900;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 2px 0 rgba(0,0,0,.35);
+      z-index: 5;
+    }
+    .paddle::before, .paddle::after {
+      content: ""; position: absolute; top: 2px;
+      width: 8px; height: 10px; background: #d6eefb; border: 1px solid #6aa0b8;
+    }
+    .paddle::before { left: 2px; } .paddle::after { right: 2px; }
+    .ball {
+      position: absolute; bottom: 66px; left: 50%; transform: translateX(-50%);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: white; box-shadow: 0 0 8px rgba(255,255,255,.8); z-index: 5;
+    }
+    .hint {
+      position: absolute; bottom: 10px; width: 100%; text-align: center;
+      color: rgba(255,255,255,.75); font-size: 12px; z-index: 6;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    /* ── ANNOTATION PANEL ── */
+    .notes {
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .note {
+      background: #1a1a1a;
+      border-left: 3px solid #555;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #ccc;
+      line-height: 1.5;
+    }
+    .note.keep   { border-left-color: #0f0; }
+    .note.change { border-left-color: #ff0; }
+    .note.open   { border-left-color: #f80; }
+    .note-tag {
+      display: inline-block;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      margin-bottom: 4px;
+      border-radius: 2px;
+    }
+    .keep   .note-tag { background: #0f0; color: #000; }
+    .change .note-tag { background: #ff0; color: #000; }
+    .open   .note-tag { background: #f80; color: #000; }
+  </style>
+</head>
+<body>
+
+  <h2>Phase 1 — Arkanoid Base Layout</h2>
+  <p class="sub">Your HTML reference + annotations for XenoGotchi adaptation</p>
+
+  <div class="layout">
+
+    <!-- GAME -->
+    <div class="panel">
+      <div class="panel-label">Reference Layout</div>
+      <div class="game" id="game">
+        <div class="rail left"></div>
+        <div class="rail right"></div>
+        <div class="score">
+          <div class="label">HIGH SCORE</div>
+          <div class="value">500000</div>
+        </div>
+        <div class="lives">
+          <div class="life"></div>
+          <div class="life"></div>
+        </div>
+        <div class="top-pipes">
+          <div class="pipe-seg"></div>
+          <div class="pipe-gap"></div>
+          <div class="pipe-seg"></div>
+        </div>
+        <div class="top-eggs">
+          <div class="egg orange"></div>
+          <div class="egg cyan"></div>
+          <div class="egg green"></div>
+        </div>
+        <div class="brick-grid" id="brickGrid"></div>
+        <div class="capsules">
+          <div class="capsule orange"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+          <div class="capsule cyan"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+          <div class="capsule green"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+          <div class="capsule red"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+          <div class="capsule blue"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+          <div class="capsule pink"><div class="core"></div><div class="band top"></div><div class="band bottom"></div></div>
+        </div>
+        <div class="ball"></div>
+        <div class="paddle" id="paddle"></div>
+        <div class="hint">Move mouse or use ← →</div>
+      </div>
+    </div>
+
+    <!-- ANNOTATIONS -->
+    <div class="panel">
+      <div class="panel-label">Design Notes</div>
+      <div class="notes">
+
+        <div class="note keep">
+          <span class="note-tag">Keep</span><br>
+          <strong>Background grid + steel rails</strong><br>
+          Perfect Arkanoid atmosphere. Keep exactly as-is for XenoGotchi Phase 1.
+        </div>
+
+        <div class="note keep">
+          <span class="note-tag">Keep</span><br>
+          <strong>3 eggs at top (orange / cyan / green)</strong><br>
+          Maps directly to Crimson / Obsidian / Ivory egg types. Colors are right. Shape is right.
+        </div>
+
+        <div class="note keep">
+          <span class="note-tag">Keep</span><br>
+          <strong>Shared yellow brick grid</strong><br>
+          The "Thermal Seal" shared block mass. All players must break through this first before hitting egg-specific blocks.
+        </div>
+
+        <div class="note change">
+          <span class="note-tag">Adapt</span><br>
+          <strong>6 capsules → 3 per-egg block columns</strong><br>
+          The capsule pillars are the right visual concept but there are 6 here (Arkanoid power-ups). For XenoGotchi we need exactly 3 — one column per egg, color-matched, with different block counts per egg type.
+        </div>
+
+        <div class="note change">
+          <span class="note-tag">Adapt</span><br>
+          <strong>Orange paddle → biomechanical/alien design</strong><br>
+          The paddle could become a bio-scanner probe platform. Same shape, but reskinned to fit the Alien aesthetic — dark metallic with Weyland-Yutani markings?
+        </div>
+
+        <div class="note open">
+          <span class="note-tag">Open Question</span><br>
+          <strong>What are the 3 egg colors in-game?</strong><br>
+          Orange/Cyan/Green here — but your spec says Crimson (red), Obsidian (black/dark), Ivory (cream). Do we swap the in-game colors to match the spec names, or keep this warmer palette?
+        </div>
+
+        <div class="note open">
+          <span class="note-tag">Open Question</span><br>
+          <strong>Per-egg column block counts</strong><br>
+          Obsidian = most blocks (dense, hardest)? Crimson = medium? Ivory = fewest (easier to crack, tank build)? Or all equal?
+        </div>
+
+        <div class="note open">
+          <span class="note-tag">Open Question</span><br>
+          <strong>"Direct hit to hatch" mechanic</strong><br>
+          Once all your egg's blocks are cleared, the egg becomes hittable directly. One clean hit = hatches. Keep this two-step win? Or auto-hatch on last block?
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+<script>
+  const brickGrid = document.getElementById('brickGrid');
+  for (let i = 0; i < 5 * 12; i++) {
+    const brick = document.createElement('div');
+    brick.className = 'brick';
+    brickGrid.appendChild(brick);
+  }
+  const game = document.getElementById('game');
+  const paddle = document.getElementById('paddle');
+  const paddleHalf = 23;
+  function setPaddle(x) {
+    const rect = game.getBoundingClientRect();
+    const clamped = Math.max(20 + paddleHalf, Math.min(rect.width - 20 - paddleHalf, x));
+    paddle.style.left = clamped + 'px';
+  }
+  game.addEventListener('mousemove', (e) => {
+    const rect = game.getBoundingClientRect();
+    setPaddle(e.clientX - rect.left);
+  });
+  window.addEventListener('keydown', (e) => {
+    const current = parseFloat(getComputedStyle(paddle).left);
+    if (e.key === 'ArrowLeft') setPaddle(current - 18);
+    if (e.key === 'ArrowRight') setPaddle(current + 18);
+  });
+</script>
+</html>

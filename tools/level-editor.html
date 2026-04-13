@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XenoGotchi — Arkanoid Level Editor</title>
+  <style>
+    :root {
+      --bg-dark: #00152b;
+      --bg-line: #0060ff;
+      --steel-light: #d8d8d8;
+      --steel-mid:   #9a9a9a;
+      --steel-dark:  #666;
+      --rail-w: 15px;
+      --top-rail-h: 15px;
+      --cols: 13;
+      --rows: 30;
+      --gap: 2px;
+      --game-w: 420px;
+      --inner-w: calc(var(--game-w) - var(--rail-w) * 2);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #ccc;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      gap: 14px;
+    }
+
+    h1 {
+      color: #ff4a1f;
+      font-size: 15px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff4a1f88;
+    }
+
+    .workspace {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ── GAME FRAME ── */
+    .game-frame {
+      position: relative;
+      width: var(--game-w);
+      background:
+        repeating-linear-gradient(90deg, var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        repeating-linear-gradient( 0deg, var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        var(--bg-dark);
+      border: 3px solid #222;
+      user-select: none;
+      padding: var(--top-rail-h) var(--rail-w) 8px;
+    }
+
+    /* Left / Right rails */
+    .rail {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: var(--rail-w);
+      background: linear-gradient(90deg, var(--steel-dark), var(--steel-light), var(--steel-mid), var(--steel-light), var(--steel-dark));
+      z-index: 10;
+    }
+    .rail.left  { left: 0; }
+    .rail.right { right: 0; }
+    .rail::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(180deg,
+        rgba(255,255,255,.2) 0 14px, rgba(0,0,0,.35) 14px 16px,
+        rgba(255,255,255,.1) 16px 30px, rgba(0,0,0,.45) 30px 32px);
+      mix-blend-mode: multiply;
+    }
+
+    /* Top / back wall */
+    .rail-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: var(--top-rail-h);
+      background: linear-gradient(180deg, var(--steel-dark), var(--steel-light), var(--steel-mid), var(--steel-light), var(--steel-dark));
+      z-index: 11;
+    }
+    .rail-top::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg,
+        rgba(255,255,255,.2) 0 14px, rgba(0,0,0,.35) 14px 16px,
+        rgba(255,255,255,.1) 16px 30px, rgba(0,0,0,.45) 30px 32px);
+      mix-blend-mode: multiply;
+    }
+
+    /* ── GRID ── */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), 1fr);
+      gap: var(--gap);
+      cursor: crosshair;
+      position: relative;
+      width: 100%;
+    }
+
+    /* Standard brick cell */
+    .cell {
+      width: 100%;
+      height: 16px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .cell:hover { border-color: rgba(255,255,255,0.18); }
+
+    /* Brick highlight */
+    .cell.filled::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,.28);
+      pointer-events: none;
+    }
+
+    /* Strength dots */
+    .cell[data-str="2"]::before {
+      content: '●';
+      position: absolute; right: 2px; bottom: 0;
+      font-size: 6px; color: rgba(255,255,255,.5);
+      line-height: 1; pointer-events: none;
+    }
+    .cell[data-str="3"]::before {
+      content: '●●';
+      position: absolute; right: 2px; bottom: 0;
+      font-size: 6px; color: rgba(255,255,255,.5);
+      line-height: 1; pointer-events: none;
+    }
+
+    /* ── EGG CELLS ── */
+    /* Eggs span 3 rows visually; we handle via a positioned overlay */
+    .cell.egg-cell {
+      background: transparent !important;
+      border-color: transparent !important;
+      overflow: visible;
+      z-index: 5;
+    }
+    .cell.egg-cell::after { display: none; }
+    .cell.egg-cell::before { display: none; }
+
+    .egg-overlay {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 34px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      pointer-events: none;
+      z-index: 6;
+    }
+    .egg-overlay.crimson  { background-image: url('img/egg_red.png'); }
+    .egg-overlay.obsidian { background-image: url('img/egg_blue.png'); }
+    .egg-overlay.ivory    { background-image: url('img/egg_green.png'); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 210px;
+    }
+
+    .panel {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      padding: 12px;
+    }
+
+    .panel-title {
+      color: #ff4a1f;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 6px;
+    }
+
+    /* Brick palette */
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+    .swatch {
+      width: 100%;
+      aspect-ratio: 1.6;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.1s, transform 0.1s;
+      position: relative;
+    }
+    .swatch::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,.25);
+    }
+    .swatch:hover  { transform: scale(1.1); }
+    .swatch.active { border-color: #fff; transform: scale(1.1); }
+    .swatch.eraser {
+      background: transparent !important;
+      border: 2px dashed #444;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #666;
+    }
+    .swatch.eraser::after { display: none; }
+    .swatch.eraser.active { border-color: #fff; color: #fff; }
+
+    /* Egg palette */
+    .egg-palette {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .egg-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 6px;
+      border: 2px solid #2a2a2a;
+      transition: border-color 0.1s;
+      flex: 1;
+    }
+    .egg-swatch:hover  { border-color: #666; }
+    .egg-swatch.active { border-color: #fff; background: #1a1a1a; }
+    .egg-pip {
+      width: 22px; height: 32px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+    .egg-pip.crimson  { background-image: url('img/egg_red.png'); }
+    .egg-pip.obsidian { background-image: url('img/egg_blue.png'); }
+    .egg-pip.ivory    { background-image: url('img/egg_green.png'); }
+    .egg-name { font-size: 8px; letter-spacing: 1px; color: #888; text-transform: uppercase; }
+
+    /* Strength */
+    .strength-row { display: flex; gap: 5px; }
+    .str-btn {
+      flex: 1; padding: 5px 0;
+      background: #1a1a1a; border: 1px solid #333;
+      color: #888; font-family: monospace; font-size: 11px;
+      cursor: pointer; text-align: center; transition: all 0.1s;
+    }
+    .str-btn:hover  { border-color: #888; color: #fff; }
+    .str-btn.active { border-color: #ff4a1f; color: #ff4a1f; background: #1a0d00; }
+    .str-btn.nobreak        { font-size: 14px; }
+    .str-btn.nobreak.active { border-color: #aaa; color: #fff; background: #1a1a1a; }
+    .str-note { font-size: 9px; color: #444; margin-top: 6px; line-height: 1.5; }
+
+    /* Indestructible brick pattern */
+    .cell.filled[data-str="0"] {
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 2px,
+        transparent 2px, transparent 6px
+      ) !important;
+    }
+    .cell.filled[data-str="0"]::before {
+      content: '▪';
+      position: absolute; right: 2px; bottom: 0;
+      font-size: 8px; color: rgba(255,255,255,.6);
+      line-height: 1; pointer-events: none;
+    }
+
+    /* Actions */
+    .action-btn {
+      width: 100%; padding: 8px;
+      background: #1a1a1a; border: 1px solid #333;
+      color: #ccc; font-family: monospace; font-size: 11px;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; text-align: center; margin-bottom: 5px; transition: all 0.1s;
+    }
+    .action-btn:hover  { border-color: #fff; color: #fff; background: #222; }
+    .action-btn.danger { border-color: #500; color: #f55; }
+    .action-btn.danger:hover { background: #1a0000; border-color: #f55; }
+    .action-btn.primary { border-color: #0a4; color: #0f0; }
+    .action-btn.primary:hover { background: #001a05; border-color: #0f0; }
+
+    #output {
+      width: 100%; height: 80px;
+      background: #000; border: 1px solid #333;
+      color: #0f0; font-family: monospace; font-size: 9px;
+      padding: 5px; resize: none; display: none;
+    }
+
+    #statusbar {
+      font-size: 10px; color: #555; letter-spacing: 1px; text-align: center;
+    }
+
+    /* ── GAME CANVAS OVERLAY ── */
+    .game-frame { position: relative; }
+
+    #gameCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      display: none;
+      cursor: none;
+      z-index: 20;
+    }
+
+    /* ── GAME HUD ── */
+    #gameHUD {
+      display: none;
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      right: 20px;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      padding: 14px;
+      font-family: monospace;
+      z-index: 200;
+      min-width: 160px;
+    }
+    .hud-title  { color: #ff4a1f; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 6px; }
+    .hud-row    { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; }
+    .hud-label  { color: #555; }
+    .hud-val    { color: #fff; }
+    .hud-lives  { display: flex; gap: 4px; margin-bottom: 10px; }
+    .hud-life   { width: 10px; height: 16px; background: #fff; border-radius: 50% 50% 45% 45%; position: relative; }
+    .hud-life::after { content:''; position:absolute; left:3px; bottom:-4px; width:4px; height:5px; background:#fff; border-radius:0 0 50% 50%; }
+    .hud-life.lost  { background: #333; }
+    .hud-life.lost::after { background: #333; }
+    .hud-msg    { color: #ff0; font-size: 11px; letter-spacing: 1px; text-align: center; margin: 8px 0; min-height: 16px; }
+    .hud-stop   { width: 100%; padding: 7px; background: #1a0000; border: 1px solid #f55; color: #f55; font-family: monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 6px; }
+    .hud-stop:hover { background: #2a0000; }
+
+    /* Test Play button */
+    .play-btn {
+      width: 100%; padding: 10px;
+      background: #001a00; border: 2px solid #0f0;
+      color: #0f0; font-family: monospace; font-size: 12px;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; text-align: center; margin-bottom: 5px;
+      transition: all 0.1s;
+    }
+    .play-btn:hover { background: #003300; box-shadow: 0 0 8px #0f04; }
+  </style>
+</head>
+<body>
+
+<h1>⬛ XenoGotchi — Level Editor ⬛</h1>
+<div id="statusbar">LEFT CLICK: paint &nbsp;|&nbsp; RIGHT CLICK: erase &nbsp;|&nbsp; DRAG to fill</div>
+
+<div class="workspace">
+
+  <!-- GAME FRAME -->
+  <div class="game-frame" id="gameFrame">
+    <div class="rail-top"></div>
+    <div class="rail left"></div>
+    <div class="rail right"></div>
+    <div id="grid"></div>
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <!-- GAME HUD (shown during play) -->
+  <div id="gameHUD">
+    <div class="hud-title">▶ Test Play</div>
+    <div class="hud-row"><span class="hud-label">BRICKS</span><span class="hud-val" id="hudBricks">0</span></div>
+    <div class="hud-row"><span class="hud-label">EGGS</span><span class="hud-val" id="hudEggs">0</span></div>
+    <div class="hud-msg" id="hudMsg">CLICK TO LAUNCH</div>
+    <button class="hud-stop" onclick="stopGame()">■ Stop</button>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- EGG TYPES -->
+    <div class="panel">
+      <div class="panel-title">Egg Types</div>
+      <div class="egg-palette" id="eggPalette">
+        <div class="egg-swatch" data-egg="crimson">
+          <div class="egg-pip crimson"></div>
+          <div class="egg-name">Crimson</div>
+        </div>
+        <div class="egg-swatch" data-egg="obsidian">
+          <div class="egg-pip obsidian"></div>
+          <div class="egg-name">Obsidian</div>
+        </div>
+        <div class="egg-swatch" data-egg="ivory">
+          <div class="egg-pip ivory"></div>
+          <div class="egg-name">Ivory</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRICK COLORS -->
+    <div class="panel">
+      <div class="panel-title">Brick Color</div>
+      <div class="palette" id="palette"></div>
+    </div>
+
+    <!-- STRENGTH -->
+    <div class="panel">
+      <div class="panel-title">Brick Strength</div>
+      <div class="strength-row" id="strengthRow">
+        <button class="str-btn active" data-str="1">1 hit</button>
+        <button class="str-btn" data-str="2">2 hits</button>
+        <button class="str-btn" data-str="3">3 hits</button>
+        <button class="str-btn nobreak" data-str="0" title="Indestructible — cannot be broken">∞</button>
+      </div>
+      <div class="str-note">Dots = hits required. ∞ = indestructible.<br>Strength only applies to bricks, not eggs.</div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="panel">
+      <div class="panel-title">Actions</div>
+      <button class="action-btn primary" onclick="exportLayout()">Export JSON</button>
+      <button class="action-btn primary" onclick="copyLayout()">Copy to Clipboard</button>
+      <label class="action-btn" style="display:block;cursor:pointer;margin-bottom:5px;">
+        Load JSON File
+        <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadFromFile(event)">
+      </label>
+      <button class="action-btn danger" onclick="clearGrid()">Clear All</button>
+      <textarea id="output" readonly></textarea>
+    </div>
+
+    <!-- TEST PLAY -->
+    <div class="panel">
+      <div class="panel-title">Test Play</div>
+      <button class="play-btn" onclick="startGame()">▶ PLAY LEVEL</button>
+      <div style="font-size:9px;color:#444;line-height:1.5;margin-top:4px;">
+        Mouse = paddle &nbsp;|&nbsp; Click / Space = launch<br>
+        Esc = stop
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const COLS = 13;
+  const ROWS = 30;
+
+  const BRICK_COLORS = [
+    { id: 'yellow',  hex: '#d5c81b', label: 'Thermal Seal' },
+    { id: 'orange',  hex: '#f5821f', label: 'Orange' },
+    { id: 'red',     hex: '#ff4a3c', label: 'Crimson Zone' },
+    { id: 'cyan',    hex: '#5ce7ff', label: 'Obsidian Zone' },
+    { id: 'green',   hex: '#3cff3c', label: 'Ivory Zone' },
+    { id: 'pink',    hex: '#ff76ef', label: 'Pink' },
+    { id: 'blue',    hex: '#78bcff', label: 'Blue' },
+    { id: 'white',   hex: '#d8d8d8', label: 'White' },
+    { id: 'gray',    hex: '#888',    label: 'Gray' },
+    { id: 'darkred', hex: '#8b0000', label: 'Dark Red' },
+    { id: 'teal',    hex: '#007a7a', label: 'Dark Cyan' },
+    { id: 'eraser',  hex: null,      label: 'Erase' },
+  ];
+
+  // Tool state
+  // mode: 'brick' | 'egg' | 'erase'
+  let mode = 'brick';
+  let currentBrickColor = BRICK_COLORS[0];
+  let currentEggType = null;   // 'crimson' | 'obsidian' | 'ivory'
+  let currentStrength = 1;
+
+  // Grid data: null | { type:'brick', color, colorId, str } | { type:'egg', eggType }
+  let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+
+  let painting = false;
+  let paintErase = false;
+
+  // ── BUILD BRICK PALETTE ──
+  const paletteEl = document.getElementById('palette');
+  BRICK_COLORS.forEach(col => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (col.id === 'eraser' ? ' eraser' : '') + (col === currentBrickColor && mode === 'brick' ? ' active' : '');
+    sw.title = col.label;
+    if (col.hex) sw.style.background = col.hex;
+    else sw.textContent = '✕';
+    sw.addEventListener('click', () => {
+      if (col.id === 'eraser') {
+        setMode('erase');
+      } else {
+        currentBrickColor = col;
+        setMode('brick');
+      }
+      updatePaletteUI();
+      updateStatus();
+    });
+    paletteEl.appendChild(sw);
+  });
+
+  // ── BUILD EGG PALETTE ──
+  document.getElementById('eggPalette').addEventListener('click', e => {
+    const sw = e.target.closest('.egg-swatch');
+    if (!sw) return;
+    currentEggType = sw.dataset.egg;
+    setMode('egg');
+    updatePaletteUI();
+    updateStatus();
+  });
+
+  function setMode(m) {
+    mode = m;
+    if (m === 'egg') currentBrickColor = null;
+  }
+
+  function updatePaletteUI() {
+    // Brick swatches
+    document.querySelectorAll('.swatch').forEach((sw, i) => {
+      const col = BRICK_COLORS[i];
+      const isActive = mode === 'brick' && col === currentBrickColor;
+      const isEraseActive = mode === 'erase' && col.id === 'eraser';
+      sw.classList.toggle('active', isActive || isEraseActive);
+    });
+    // Egg swatches
+    document.querySelectorAll('.egg-swatch').forEach(sw => {
+      sw.classList.toggle('active', mode === 'egg' && sw.dataset.egg === currentEggType);
+    });
+  }
+
+  // ── BUILD GRID ──
+  const gridEl = document.getElementById('grid');
+  const cells = Array.from({ length: ROWS }, (_, r) =>
+    Array.from({ length: COLS }, (_, c) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      gridEl.appendChild(cell);
+      return cell;
+    })
+  );
+
+  // ── PAINT ──
+  function paintCell(r, c, forceErase) {
+    const erase = forceErase || mode === 'erase';
+    const cell = cells[r][c];
+
+    // Clear existing egg overlay if present
+    const existing = cell.querySelector('.egg-overlay');
+    if (existing) existing.remove();
+
+    if (erase) {
+      grid[r][c] = null;
+      cell.className = 'cell';
+      cell.style.background = '';
+      cell.removeAttribute('data-str');
+    } else if (mode === 'egg') {
+      grid[r][c] = { type: 'egg', eggType: currentEggType };
+      cell.className = 'cell egg-cell';
+      cell.style.background = '';
+      cell.removeAttribute('data-str');
+      const ov = document.createElement('div');
+      ov.className = `egg-overlay ${currentEggType}`;
+      cell.appendChild(ov);
+    } else {
+      // brick
+      grid[r][c] = { type: 'brick', color: currentBrickColor.hex, colorId: currentBrickColor.id, str: currentStrength };
+      cell.className = 'cell filled';
+      cell.style.background = currentBrickColor.hex;
+      cell.dataset.str = currentStrength;
+    }
+    updateStatus();
+  }
+
+  gridEl.addEventListener('mousedown', e => {
+    if (e.button !== 0 && e.button !== 2) return;
+    e.preventDefault();
+    painting = true;
+    paintErase = e.button === 2;
+    const cell = e.target.closest('.cell');
+    if (cell) paintCell(+cell.dataset.r, +cell.dataset.c, paintErase);
+  });
+
+  gridEl.addEventListener('mousemove', e => {
+    if (!painting) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const cell = el && el.closest('.cell');
+    if (cell && cell.closest('#grid')) paintCell(+cell.dataset.r, +cell.dataset.c, paintErase);
+  });
+
+  window.addEventListener('mouseup', () => { painting = false; });
+  gridEl.addEventListener('contextmenu', e => e.preventDefault());
+
+  // ── STRENGTH ──
+  document.getElementById('strengthRow').addEventListener('click', e => {
+    const btn = e.target.closest('.str-btn');
+    if (!btn) return;
+    document.querySelectorAll('.str-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentStrength = +btn.dataset.str;
+    updateStatus();
+  });
+
+  // ── CLEAR ──
+  function clearGrid() {
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++) {
+        grid[r][c] = null;
+        cells[r][c].className = 'cell';
+        cells[r][c].style.background = '';
+        cells[r][c].removeAttribute('data-str');
+        const ov = cells[r][c].querySelector('.egg-overlay');
+        if (ov) ov.remove();
+      }
+    updateStatus();
+  }
+
+  // ── EXPORT ──
+  function getLayoutData() {
+    const items = [];
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++)
+        if (grid[r][c]) items.push({ r, c, ...grid[r][c] });
+    return { cols: COLS, rows: ROWS, items };
+  }
+
+  function exportLayout() {
+    const out = document.getElementById('output');
+    out.style.display = 'block';
+    out.value = JSON.stringify(getLayoutData(), null, 2);
+  }
+
+  function copyLayout() {
+    navigator.clipboard.writeText(JSON.stringify(getLayoutData(), null, 2)).then(() => {
+      updateStatus('✓ Copied to clipboard!');
+      setTimeout(updateStatus, 2000);
+    });
+  }
+
+  // ── STATUS ──
+  function loadFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        loadLayout(data);
+        updateStatus(`✓ Loaded: ${file.name}`);
+        setTimeout(updateStatus, 2500);
+      } catch (err) {
+        updateStatus('✗ Invalid JSON file');
+        setTimeout(updateStatus, 2500);
+      }
+      // reset input so same file can be reloaded
+      event.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  function loadLayout(data) {
+    clearGrid();
+    if (!data.items) return;
+    data.items.forEach(item => {
+      const r = item.r;
+      const c = item.c;
+      if (r >= ROWS || c >= COLS) return;
+      const cell = cells[r][c];
+      // Remove any existing egg overlay
+      const existing = cell.querySelector('.egg-overlay');
+      if (existing) existing.remove();
+
+      if (item.type === 'egg') {
+        grid[r][c] = { type: 'egg', eggType: item.eggType };
+        cell.className = 'cell egg-cell';
+        cell.style.background = '';
+        cell.removeAttribute('data-str');
+        const ov = document.createElement('div');
+        ov.className = `egg-overlay ${item.eggType}`;
+        cell.appendChild(ov);
+      } else {
+        grid[r][c] = { type: 'brick', color: item.color, colorId: item.colorId, str: item.str };
+        cell.className = 'cell filled';
+        cell.style.background = item.color;
+        cell.dataset.str = item.str;
+      }
+    });
+    updateStatus();
+  }
+
+  function updateStatus(msg) {
+    const bar = document.getElementById('statusbar');
+    if (msg) { bar.textContent = msg; return; }
+    const total = grid.flat().filter(Boolean).length;
+    const eggs = grid.flat().filter(c => c && c.type === 'egg').length;
+    const bricks = total - eggs;
+    if (mode === 'erase')
+      bar.textContent = `MODE: ERASE  |  BRICKS: ${bricks}  EGGS: ${eggs}`;
+    else if (mode === 'egg')
+      bar.textContent = `EGG: ${currentEggType.toUpperCase()}  |  BRICKS: ${bricks}  EGGS: ${eggs}`;
+    else
+      bar.textContent = `BRICK: ${currentBrickColor.label.toUpperCase()}  |  STR: ${currentStrength}  |  BRICKS: ${bricks}  EGGS: ${eggs}`;
+  }
+
+  updateStatus();
+
+  // ════════════════════════════════════════════
+  // GAME ENGINE
+  // ════════════════════════════════════════════
+
+  const RAIL_W   = 15;
+  const TOP_H    = 15;
+  const PADDLE_W = 64;
+  const PADDLE_H = 10;
+  const BALL_R   = 5;
+  const BASE_SPD = 5;
+
+  const EGG_COLORS = { crimson: '#ff3333', obsidian: '#5ce7ff', ivory: '#3cff3c' };
+
+  // Preload egg images for canvas rendering
+  const EGG_IMGS = {};
+  ['crimson', 'obsidian', 'ivory'].forEach(type => {
+    const src = { crimson: 'img/egg_red.png', obsidian: 'img/egg_blue.png', ivory: 'img/egg_green.png' }[type];
+    const img = new Image();
+    img.src = src;
+    EGG_IMGS[type] = img;
+  });
+
+  let gameRunning    = false;
+  let animId         = null;
+  let gameBricks     = [];   // { x,y,w,h, color, str, health, eggType, flash }
+  let paddle         = {};
+  let ball           = {};
+  let launched       = false;
+  let phase          = 'ready'; // 'ready' | 'play' | 'gutter' | 'won'
+  let mouseX         = 0;
+  let flashParticles = [];
+  let score          = 0;
+  let destroyHistory = []; // last 2 destroyed bricks (non-egg, non-indestructible)
+
+  const canvasEl = document.getElementById('gameCanvas');
+  const ctx      = canvasEl.getContext('2d');
+  const gameFrame = document.getElementById('gameFrame');
+
+  function startGame() {
+    if (gameRunning) return;
+    gameRunning = true;
+
+    // Size canvas to game frame
+    const fr = gameFrame.getBoundingClientRect();
+    canvasEl.width  = fr.width;
+    canvasEl.height = fr.height;
+    canvasEl.style.width  = fr.width  + 'px';
+    canvasEl.style.height = fr.height + 'px';
+    canvasEl.style.display = 'block';
+
+    // Snapshot bricks from current grid cells
+    gameBricks = [];
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (!grid[r][c]) continue;
+        const cellEl  = cells[r][c];
+        const cr      = cellEl.getBoundingClientRect();
+        const bx      = cr.left - fr.left;
+        const by      = cr.top  - fr.top;
+        const bw      = cr.width;
+        const bh      = cr.height;
+        const d       = grid[r][c];
+        gameBricks.push({
+          x: bx, y: by, w: bw, h: bh,
+          color:   d.type === 'egg' ? EGG_COLORS[d.eggType] : d.color,
+          str:     d.type === 'egg' ? 1 : d.str,
+          health:  d.type === 'egg' ? 1 : (d.str === 0 ? Infinity : d.str),
+          isEgg:   d.type === 'egg',
+          eggType: d.eggType || null,
+          flash:   0,
+          alive:   true,
+        });
+      }
+    }
+
+    // Paddle & ball
+    const cw = canvasEl.width;
+    const ch = canvasEl.height;
+    paddle = { x: cw / 2 - PADDLE_W / 2, y: ch - 36, w: PADDLE_W, h: PADDLE_H };
+    resetBall();
+    launched       = false;
+    phase          = 'ready';
+    score          = 0;
+    flashParticles = [];
+    destroyHistory = [];
+
+    document.getElementById('gameHUD').style.display = 'block';
+    updateHUD();
+
+    canvasEl.addEventListener('mousemove', onMouseMove);
+    canvasEl.addEventListener('click',     onLaunch);
+    window.addEventListener('keydown',     onKey);
+
+    animId = requestAnimationFrame(gameLoop);
+  }
+
+  function stopGame() {
+    gameRunning = false;
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    canvasEl.style.display = 'none';
+    document.getElementById('gameHUD').style.display = 'none';
+    canvasEl.removeEventListener('mousemove', onMouseMove);
+    canvasEl.removeEventListener('click',     onLaunch);
+    window.removeEventListener('keydown',     onKey);
+  }
+
+  function resetBall() {
+    ball = {
+      x: paddle.x + PADDLE_W / 2,
+      y: paddle.y - BALL_R - 1,
+      vx: (Math.random() > 0.5 ? 1 : -1) * BASE_SPD * 0.6,
+      vy: -BASE_SPD,
+      r: BALL_R,
+    };
+    launched = false;
+  }
+
+  function onMouseMove(e) {
+    const r  = canvasEl.getBoundingClientRect();
+    mouseX   = e.clientX - r.left;
+    paddle.x = Math.max(RAIL_W, Math.min(canvasEl.width - RAIL_W - PADDLE_W, mouseX - PADDLE_W / 2));
+    if (!launched) ball.x = paddle.x + PADDLE_W / 2;
+  }
+
+  function onLaunch() {
+    if (phase === 'ready')  { launched = true; phase = 'play'; setHudMsg(''); }
+    if (phase === 'gutter') { resetBall(); phase = 'ready'; setHudMsg('CLICK TO LAUNCH'); }
+    if (phase === 'won') stopGame();
+  }
+
+  function onKey(e) {
+    if (e.key === 'Escape') { stopGame(); return; }
+    if ((e.key === ' ' || e.key === 'Enter') && (phase === 'ready' || phase === 'gutter' || phase === 'won')) {
+      onLaunch();
+    }
+    // Arrow key paddle
+    const step = 18;
+    if (e.key === 'ArrowLeft')  paddle.x = Math.max(RAIL_W, paddle.x - step);
+    if (e.key === 'ArrowRight') paddle.x = Math.min(canvasEl.width - RAIL_W - PADDLE_W, paddle.x + step);
+    if (!launched) ball.x = paddle.x + PADDLE_W / 2;
+  }
+
+  // ── GAME LOOP ──
+  function gameLoop() {
+    if (!gameRunning) return;
+    update();
+    draw();
+    animId = requestAnimationFrame(gameLoop);
+  }
+
+  function update() {
+    if (phase !== 'play') return;
+
+    // Move ball
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // Wall collisions
+    if (ball.x - ball.r < RAIL_W)                         { ball.x = RAIL_W + ball.r;                         ball.vx = Math.abs(ball.vx); }
+    if (ball.x + ball.r > canvasEl.width - RAIL_W)        { ball.x = canvasEl.width - RAIL_W - ball.r;        ball.vx = -Math.abs(ball.vx); }
+    if (ball.y - ball.r < TOP_H)                          { ball.y = TOP_H + ball.r;                           ball.vy = Math.abs(ball.vy); }
+
+    // Ball guttered — restore last 2 destroyed bricks, reset ball
+    if (ball.y - ball.r > canvasEl.height + 20) {
+      // Regenerate last 2 non-egg, non-indestructible bricks
+      const toRestore = destroyHistory.splice(-2);
+      for (const b of toRestore) {
+        b.alive  = true;
+        b.health = b.str;
+        b.flash  = 0;
+      }
+      phase = 'gutter';
+      setHudMsg('SEALED BACK — CLICK TO RETRY');
+      updateHUD();
+      return;
+    }
+
+    // Paddle collision
+    if (circleRect(ball, paddle)) {
+      ball.vy = -Math.abs(ball.vy);
+      // Angle based on hit position
+      const rel = (ball.x - (paddle.x + PADDLE_W / 2)) / (PADDLE_W / 2);
+      ball.vx = rel * BASE_SPD;
+      // Clamp speed
+      const spd = Math.hypot(ball.vx, ball.vy);
+      ball.vx = ball.vx / spd * BASE_SPD;
+      ball.vy = ball.vy / spd * BASE_SPD;
+      ball.y  = paddle.y - ball.r - 1;
+    }
+
+    // Brick collisions
+    let breakable = 0;
+    for (const b of gameBricks) {
+      if (!b.alive) continue;
+      if (b.health !== Infinity) breakable++;
+
+      if (!circleRect(ball, b)) continue;
+
+      // Reflect ball
+      const nx = Math.max(b.x, Math.min(ball.x, b.x + b.w));
+      const ny = Math.max(b.y, Math.min(ball.y, b.y + b.h));
+      const dx = ball.x - nx;
+      const dy = ball.y - ny;
+      if (Math.abs(dx) > Math.abs(dy)) ball.vx *= -1;
+      else                              ball.vy *= -1;
+
+      // Hit
+      b.flash = 8;
+      if (b.health !== Infinity) {
+        b.health--;
+        if (b.health <= 0) {
+          b.alive = false;
+          score += b.isEgg ? 500 : 100;
+          spawnParticles(b);
+          // Track for gutter-setback (only restorable bricks)
+          if (!b.isEgg) {
+            destroyHistory.push(b);
+            if (destroyHistory.length > 2) destroyHistory.shift();
+          }
+        }
+      }
+      break; // one brick per frame
+    }
+
+    // Tick flash
+    for (const b of gameBricks) if (b.flash > 0) b.flash--;
+    flashParticles = flashParticles.filter(p => p.life > 0);
+    flashParticles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--; });
+
+    // Win check
+    const remaining = gameBricks.filter(b => b.alive && b.health !== Infinity).length;
+    if (remaining === 0) {
+      phase = 'won';
+      setHudMsg('YOU WIN!  CLICK TO EXIT');
+    }
+    updateHUD();
+  }
+
+  function circleRect(c, r) {
+    const nx = Math.max(r.x, Math.min(c.x, r.x + r.w));
+    const ny = Math.max(r.y, Math.min(c.y, r.y + r.h));
+    return Math.hypot(c.x - nx, c.y - ny) < c.r;
+  }
+
+  function spawnParticles(b) {
+    for (let i = 0; i < 6; i++) {
+      flashParticles.push({
+        x: b.x + b.w / 2, y: b.y + b.h / 2,
+        vx: (Math.random() - 0.5) * 4,
+        vy: (Math.random() - 1.5) * 3,
+        color: b.color, life: 20 + Math.random() * 10,
+      });
+    }
+  }
+
+  // ── DRAW ──
+  function draw() {
+    const cw = canvasEl.width;
+    const ch = canvasEl.height;
+    ctx.clearRect(0, 0, cw, ch);
+
+    // Background
+    ctx.fillStyle = '#00152b';
+    ctx.fillRect(0, 0, cw, ch);
+    drawGrid(cw, ch);
+
+    // Rails
+    drawRailV(0,     ch); // left
+    drawRailV(cw - RAIL_W, ch); // right
+    drawRailH(cw);         // top
+
+    // Bricks
+    for (const b of gameBricks) {
+      if (!b.alive) continue;
+      const flash = b.flash > 0;
+
+      if (b.isEgg) {
+        // draw egg PNG image
+        const img = EGG_IMGS[b.eggType];
+        const iw = b.w * 1.1;
+        const ih = b.h * 2.125; // covers clicked brick + one below (34px)
+        if (flash) {
+          ctx.save();
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(b.x, b.y, b.w, ih);
+          ctx.restore();
+        }
+        if (img && img.complete) {
+          ctx.drawImage(img, b.x + b.w/2 - iw/2, b.y, iw, ih);
+        } else {
+          // fallback: colored rect while image loads
+          ctx.fillStyle = b.color;
+          ctx.fillRect(b.x, b.y, b.w, b.h);
+        }
+      } else {
+        // Normal brick: fill + highlight
+        ctx.fillStyle = flash ? '#ffffff' : b.color;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        ctx.fillStyle = 'rgba(255,255,255,0.22)';
+        ctx.fillRect(b.x, b.y, b.w, 3);
+
+        if (b.health === Infinity) {
+        // indestructible hatch
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 1;
+        for (let i = -b.h; i < b.w + b.h; i += 5) {
+          ctx.beginPath(); ctx.moveTo(b.x + i, b.y); ctx.lineTo(b.x + i + b.h, b.y + b.h); ctx.stroke();
+        }
+        ctx.restore();
+        } else if (b.str > 1) {
+          // health dots
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
+          ctx.font = '6px monospace';
+          ctx.fillText('●'.repeat(Math.min(b.health, 3)), b.x + b.w - 10, b.y + b.h - 1);
+        }
+      } // end else (normal brick)
+    } // end for gameBricks
+
+    // Particles
+    for (const p of flashParticles) {
+      ctx.globalAlpha = p.life / 30;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+    }
+    ctx.globalAlpha = 1;
+
+    // Paddle
+    const pg = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x, paddle.y + PADDLE_H);
+    pg.addColorStop(0, '#ffa65c');
+    pg.addColorStop(1, '#e86615');
+    ctx.fillStyle = pg;
+    ctx.fillRect(paddle.x, paddle.y, PADDLE_W, PADDLE_H);
+    ctx.fillStyle = '#d6eefb';
+    ctx.fillRect(paddle.x + 2, paddle.y + 2, 8, PADDLE_H - 4);
+    ctx.fillRect(paddle.x + PADDLE_W - 10, paddle.y + 2, 8, PADDLE_H - 4);
+
+    // Ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ffffff';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Overlays
+    if (phase === 'ready') {
+      ctx.fillStyle = 'rgba(255,255,0,0.7)';
+      ctx.font = 'bold 13px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('CLICK TO LAUNCH', cw / 2, paddle.y - 20);
+      ctx.textAlign = 'left';
+    }
+    if (phase === 'won') {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.fillStyle = '#0f0';
+      ctx.font = 'bold 22px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('YOU WIN!', cw / 2, ch / 2 - 10);
+      ctx.fillStyle = '#ff0';
+      ctx.font = '12px monospace';
+      ctx.fillText('CLICK TO EXIT', cw / 2, ch / 2 + 18);
+      ctx.textAlign = 'left';
+    }
+    if (phase === 'lost') {
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.fillStyle = '#f55';
+      ctx.font = 'bold 22px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('GAME OVER', cw / 2, ch / 2 - 10);
+      ctx.fillStyle = '#ff0';
+      ctx.font = '12px monospace';
+      ctx.fillText('CLICK TO EXIT', cw / 2, ch / 2 + 18);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  function drawGrid(cw, ch) {
+    ctx.strokeStyle = '#0060ff';
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.3;
+    for (let x = 0; x < cw; x += 28) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ch); ctx.stroke(); }
+    for (let y = 0; y < ch; y += 28) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawRailV(x, h) {
+    const g = ctx.createLinearGradient(x, 0, x + RAIL_W, 0);
+    g.addColorStop(0,   '#666'); g.addColorStop(0.3, '#d8d8d8');
+    g.addColorStop(0.5, '#9a9a9a'); g.addColorStop(0.7, '#d8d8d8');
+    g.addColorStop(1,   '#666');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, 0, RAIL_W, h);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 2;
+    for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(x, y+14); ctx.lineTo(x + RAIL_W, y+14); ctx.stroke(); }
+  }
+
+  function drawRailH(cw) {
+    const g = ctx.createLinearGradient(0, 0, 0, TOP_H);
+    g.addColorStop(0,   '#666'); g.addColorStop(0.3, '#d8d8d8');
+    g.addColorStop(0.5, '#9a9a9a'); g.addColorStop(0.7, '#d8d8d8');
+    g.addColorStop(1,   '#666');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, cw, TOP_H);
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 2;
+    for (let x = 0; x < cw; x += 30) { ctx.beginPath(); ctx.moveTo(x+14, 0); ctx.lineTo(x+14, TOP_H); ctx.stroke(); }
+  }
+
+  function updateHUD() {
+    const remaining = gameBricks.filter(b => b.alive && !b.isEgg && b.health !== Infinity).length;
+    const eggs      = gameBricks.filter(b => b.alive && b.isEgg).length;
+    document.getElementById('hudBricks').textContent = remaining;
+    document.getElementById('hudEggs').textContent   = eggs;
+  }
+
+  function setHudMsg(msg) {
+    document.getElementById('hudMsg').textContent = msg;
+  }
+</script>
+</body>
+</html>

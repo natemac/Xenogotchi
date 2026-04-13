@@ -1,0 +1,299 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .q-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #ffff00;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0 #7a6e00;
+  }
+  .q-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: #888;
+    margin-bottom: 28px;
+    line-height: 2;
+    letter-spacing: 1px;
+  }
+
+  .archs {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .arch-card {
+    background: #050505;
+    border: 2px solid #1f6b1f;
+    padding: 14px 12px;
+    width: 210px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    transition: border-color 0.1s;
+  }
+  .arch-card:hover { border-color: #3cff3c; }
+  .arch-card.selected { border-color: #ffff00; box-shadow: 0 0 10px rgba(255,255,0,0.25); }
+
+  .arch-label {
+    font-size: 7px;
+    color: #ffff00;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  /* mini diagram */
+  .diagram {
+    background: #000;
+    border: 1px solid #1f6b1f;
+    padding: 10px 8px;
+    margin-bottom: 12px;
+    font-size: 0;
+  }
+
+  .d-bar {
+    background: #0a2a0a;
+    border: 1px solid #3cff3c;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    color: #3cff3c;
+    text-align: center;
+    padding: 4px 0;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .d-viewport {
+    background: #000;
+    border: 1px solid #1f6b1f;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .d-phase-box {
+    background: #00152b;
+    border: 1px solid #3cff3c44;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    color: #3cff3c88;
+    padding: 4px 8px;
+    letter-spacing: 1px;
+    text-align: center;
+    width: 90%;
+  }
+
+  .d-iframe {
+    background: #0a001a;
+    border: 2px dashed #5ce7ff44;
+    height: 66px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .d-iframe-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 4px;
+    color: #5ce7ff55;
+    letter-spacing: 1px;
+  }
+
+  .d-pages {
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    height: 70px;
+  }
+
+  .d-page {
+    flex: 1;
+    border: 1px solid #1f6b1f;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .d-page-bar {
+    background: #0a2a0a;
+    border-bottom: 1px solid #3cff3c44;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 4px;
+    color: #3cff3c88;
+    padding: 2px 3px;
+    width: 100%;
+    letter-spacing: 1px;
+  }
+
+  .d-page-body {
+    flex: 1;
+    background: #00152b;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .d-pixel {
+    width: 8px;
+    height: 11px;
+    background: #f33;
+    opacity: 0.5;
+    border-radius: 0 0 50% 50% / 0 0 30% 30%;
+  }
+
+  .d-arrow {
+    font-family: monospace;
+    font-size: 8px;
+    color: #1f6b1f;
+    text-align: center;
+    width: 100%;
+    display: block;
+    margin: 3px 0;
+  }
+
+  /* pros/cons */
+  .arch-pro, .arch-con {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    letter-spacing: 1px;
+    line-height: 2.4;
+    padding-left: 10px;
+    position: relative;
+  }
+  .arch-pro { color: #3cff3c; }
+  .arch-con { color: #555; }
+  .arch-pro::before { content: '+'; position: absolute; left: 0; color: #3cff3c; }
+  .arch-con::before { content: '−'; position: absolute; left: 0; color: #555; }
+
+  .rec-badge {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    color: #3cff3c;
+    border: 1px solid #1f6b1f;
+    padding: 3px 5px;
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  .section-head {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    color: #1f6b1f;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+</style>
+
+<div class="q-title">HOW SHOULD THE APP SHELL WORK?</div>
+<div class="q-sub">The taskbar persists — but how do phases load beneath it?<br>No build tools. Pure vanilla JS.</div>
+
+<div class="archs">
+
+  <!-- A: MULTI-PAGE + SHARED SCRIPT -->
+  <div class="arch-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="arch-label">▶ A — SHARED CHROME</div>
+    <div class="diagram">
+      <div class="d-pages">
+        <div class="d-page">
+          <div class="d-page-bar">BRIEF.HTML</div>
+          <div class="d-page-body" style="flex-direction:column;gap:2px;padding:2px;">
+            <div style="width:90%;height:6px;background:#0a2a0a;border:1px solid #3cff3c; font-family:monospace;font-size:4px;color:#3cff3c;text-align:center;line-height:6px;">TASKBAR.JS</div>
+            <div style="width:90%;flex:1;background:#001020;border:1px solid #1f6b1f;display:flex;align-items:center;justify-content:center;">
+              <div style="font-family:'Press Start 2P',monospace;font-size:3px;color:#3cff3c44;letter-spacing:1px;">PAGE<br>CONTENT</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-page">
+          <div class="d-page-bar">PHASE1.HTML</div>
+          <div class="d-page-body" style="flex-direction:column;gap:2px;padding:2px;">
+            <div style="width:90%;height:6px;background:#0a2a0a;border:1px solid #3cff3c; font-family:monospace;font-size:4px;color:#3cff3c;text-align:center;line-height:6px;">TASKBAR.JS</div>
+            <div style="width:90%;flex:1;background:#001020;border:1px solid #1f6b1f;display:flex;align-items:center;justify-content:center;">
+              <div class="d-pixel"></div>
+            </div>
+          </div>
+        </div>
+        <div class="d-page">
+          <div class="d-page-bar">PHASE2.HTML</div>
+          <div class="d-page-body" style="flex-direction:column;gap:2px;padding:2px;">
+            <div style="width:90%;height:6px;background:#0a2a0a;border:1px solid #3cff3c; font-family:monospace;font-size:4px;color:#3cff3c;text-align:center;line-height:6px;">TASKBAR.JS</div>
+            <div style="width:90%;flex:1;background:#001020;border:1px solid #1f6b1f;display:flex;align-items:center;justify-content:center;">
+              <div style="font-family:'Press Start 2P',monospace;font-size:3px;color:#3cff3c44;letter-spacing:1px;">CARDS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section-head">GOOD</div>
+    <div class="arch-pro">Least code change needed</div>
+    <div class="arch-pro">Phases stay isolated</div>
+    <div class="arch-pro">Each page debugs cleanly</div>
+    <div style="height:6px;"></div>
+    <div class="section-head">TRADEOFFS</div>
+    <div class="arch-con">Page reload on transition</div>
+    <div class="arch-con">Taskbar re-renders each page</div>
+    <div class="arch-con">Transitions limited to CSS</div>
+    <div class="rec-badge">LOWEST EFFORT MIGRATION</div>
+  </div>
+
+  <!-- B: APP SHELL + JS MODULE LOADING -->
+  <div class="arch-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="arch-label">▶ B — APP SHELL</div>
+    <div class="diagram">
+      <div class="d-bar">✉ VITALS CODEX ⚙ 💾 — TASKBAR (ALWAYS LIVE)</div>
+      <div class="d-viewport">
+        <div class="d-phase-box">▶ PHASE MODULE LOADS HERE</div>
+        <span style="font-family:monospace;font-size:8px;color:#1f6b1f;">↕</span>
+        <div class="d-phase-box" style="opacity:0.4;">phase1.js · phase2a.js · ...</div>
+      </div>
+    </div>
+    <div class="section-head">GOOD</div>
+    <div class="arch-pro">Taskbar truly persistent</div>
+    <div class="arch-pro">No page reload, instant swap</div>
+    <div class="arch-pro">State stays in memory</div>
+    <div class="arch-pro">Future app port is clean</div>
+    <div style="height:6px;"></div>
+    <div class="section-head">TRADEOFFS</div>
+    <div class="arch-con">Phase1.html needs refactor</div>
+    <div class="arch-con">Phases share JS scope</div>
+    <div class="rec-badge">★ RECOMMENDED</div>
+  </div>
+
+  <!-- C: IFRAME -->
+  <div class="arch-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="arch-label">▶ C — IFRAME</div>
+    <div class="diagram">
+      <div class="d-bar">✉ VITALS CODEX ⚙ 💾 — TASKBAR</div>
+      <div class="d-viewport">
+        <div class="d-iframe">
+          <div class="d-iframe-label">╔══════════════╗</div>
+          <div class="d-iframe-label">║  phase1.html  ║</div>
+          <div class="d-iframe-label">║  (iframe)     ║</div>
+          <div class="d-iframe-label">╚══════════════╝</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-head">GOOD</div>
+    <div class="arch-pro">Zero refactor to phases</div>
+    <div class="arch-pro">Perfect isolation</div>
+    <div style="height:6px;"></div>
+    <div class="section-head">TRADEOFFS</div>
+    <div class="arch-con">postMessage for all comms</div>
+    <div class="arch-con">Scaling/sizing headaches</div>
+    <div class="arch-con">Bad for native app future</div>
+    <div class="arch-con">Canvas touch events quirky</div>
+    <div class="rec-badge">AVOID FOR THIS PROJECT</div>
+  </div>
+
+</div>

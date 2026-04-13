@@ -1,0 +1,231 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+  .q-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #ffff00;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0 #7a6e00;
+  }
+  .q-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: #888;
+    margin-bottom: 28px;
+    line-height: 2;
+    letter-spacing: 1px;
+  }
+
+  .layouts {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .layout-card {
+    background: #0a0a0a;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 14px;
+    width: 200px;
+    cursor: pointer;
+    transition: border-color 0.1s, box-shadow 0.1s;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .layout-card:hover { border-color: #3cff3c; }
+  .layout-card.selected { border-color: #ffff00; box-shadow: 0 0 12px rgba(255,255,0,0.3); }
+
+  .layout-label {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: #ffff00;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  /* phone shell */
+  .phone {
+    width: 120px;
+    height: 200px;
+    border: 2px solid #555;
+    border-radius: 10px;
+    margin: 0 auto 12px;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .phone-bar {
+    background: #111;
+    border: 1px solid #3cff3c44;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 4px 2px;
+    flex-shrink: 0;
+  }
+
+  .phone-bar-icon {
+    font-size: 8px;
+    color: #3cff3c;
+    font-family: monospace;
+  }
+
+  .phone-bar-icon.notify::after {
+    content: '●';
+    color: #ffff00;
+    font-size: 5px;
+    vertical-align: super;
+  }
+
+  .phone-screen {
+    flex: 1;
+    background: #00152b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .phone-screen-label {
+    font-size: 5px;
+    color: #3cff3c88;
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 1px;
+  }
+
+  .phone-game-area {
+    width: 60px;
+    height: 80px;
+    border: 1px solid #3cff3c33;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .phone-game-pixel {
+    width: 18px;
+    height: 26px;
+    background: #f33;
+    opacity: 0.7;
+    border-radius: 0 0 50% 50% / 0 0 30% 30%;
+  }
+
+  .layout-desc {
+    font-size: 5px;
+    color: #888;
+    line-height: 2;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .layout-tag {
+    font-size: 5px;
+    color: #5ce7ff;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .rec-badge {
+    display: inline-block;
+    background: #3cff3c22;
+    border: 1px solid #3cff3c;
+    color: #3cff3c;
+    font-size: 5px;
+    padding: 2px 6px;
+    letter-spacing: 1px;
+    margin-top: 6px;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* desktop shell for option C */
+  .desktop {
+    width: 120px;
+    height: 200px;
+    border: 2px solid #555;
+    border-radius: 4px;
+    margin: 0 auto 12px;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+</style>
+
+<div class="q-title">WHERE SHOULD THE TASKBAR LIVE?</div>
+<div class="q-sub">This affects every screen. Choose the layout that feels right<br>for how players will use this game.</div>
+
+<div class="layouts">
+
+  <!-- OPTION A: TOP BAR -->
+  <div class="layout-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="layout-label">▶ A — TOP BAR</div>
+    <div class="phone">
+      <div class="phone-bar" style="border-top:none; border-bottom-color:#3cff3c44;">
+        <span class="phone-bar-icon notify">✉</span>
+        <span class="phone-bar-icon">⚙</span>
+        <span class="phone-bar-icon">💾</span>
+      </div>
+      <div class="phone-screen">
+        <div class="phone-screen-label">PHASE 1</div>
+        <div class="phone-game-area">
+          <div class="phone-game-pixel"></div>
+        </div>
+      </div>
+    </div>
+    <div class="layout-desc">Bar always at top.<br>Standard web app feel.<br>Desktop-native.</div>
+    <div class="layout-tag">DESKTOP / WEB NATIVE</div>
+  </div>
+
+  <!-- OPTION B: BOTTOM BAR -->
+  <div class="layout-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="layout-label">▶ B — BOTTOM BAR</div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-screen-label">PHASE 1</div>
+        <div class="phone-game-area">
+          <div class="phone-game-pixel"></div>
+        </div>
+      </div>
+      <div class="phone-bar" style="border-bottom:none; border-top-color:#3cff3c44;">
+        <span class="phone-bar-icon notify">✉</span>
+        <span class="phone-bar-icon">⚙</span>
+        <span class="phone-bar-icon">💾</span>
+      </div>
+    </div>
+    <div class="layout-desc">Bar always at bottom.<br>Thumb-friendly on mobile.<br>iOS/Android standard.</div>
+    <div class="layout-tag">MOBILE / NATIVE APP</div>
+    <div class="rec-badge">★ RECOMMENDED</div>
+  </div>
+
+  <!-- OPTION C: ADAPTIVE -->
+  <div class="layout-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="layout-label">▶ C — ADAPTIVE</div>
+    <div class="phone" style="flex-direction: row; height: 200px; width: 120px; flex-direction: column;">
+      <div class="phone-bar" style="border-top:none; border-bottom-color:#3cff3c44; opacity: 0.4;">
+        <span style="font-size:5px; color:#888; font-family:monospace;">DESKTOP →</span>
+      </div>
+      <div class="phone-screen" style="flex:1;">
+        <div class="phone-screen-label">PHASE 1</div>
+        <div class="phone-game-area">
+          <div class="phone-game-pixel"></div>
+        </div>
+      </div>
+      <div class="phone-bar" style="border-bottom:none; border-top-color:#3cff3c44; opacity:0.4;">
+        <span style="font-size:5px; color:#888; font-family:monospace;">← MOBILE</span>
+      </div>
+    </div>
+    <div class="layout-desc">Top on desktop/tablet.<br>Bottom on phone.<br>CSS media query driven.</div>
+    <div class="layout-tag">BEST OF BOTH</div>
+  </div>
+
+</div>

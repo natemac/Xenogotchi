@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; image-rendering: pixelated; }
+  body {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: monospace;
+  }
+  h2 {
+    color: #fff;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .subtitle {
+    color: #888;
+    font-family: monospace;
+    font-size: 11px;
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+
+  /* The arcade screen */
+  .screen {
+    background: #000;
+    border: 3px solid #444;
+    width: 280px;
+    position: relative;
+    padding-bottom: 8px;
+    outline: 6px solid #222;
+  }
+
+  /* Score bar */
+  .score-bar {
+    background: #000;
+    color: #f00;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 4px 0 2px;
+    border-bottom: 1px solid #222;
+  }
+  .score-bar span { color: #fff; }
+
+  /* Eggs row */
+  .eggs-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding: 8px 14px 4px;
+    background: #000;
+  }
+  .egg {
+    width: 38px;
+    height: 52px;
+    border-radius: 50% 50% 48% 48%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .egg-red    { background: #f00; border: 2px solid #f66; }
+  .egg-cyan   { background: #0cc; border: 2px solid #0ff; }
+  .egg-green  { background: #0a0; border: 2px solid #0f0; }
+  /* simple 1px highlight - no gradient */
+  .egg::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 7px;
+    width: 10px; height: 5px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+  }
+  .egg-label {
+    color: #fff;
+    font-size: 7px;
+    font-family: monospace;
+    letter-spacing: 0;
+    margin-top: 2px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .egg-wrap { display:flex; flex-direction:column; align-items:center; }
+
+  /* Shared block mass */
+  .shared-label {
+    font-family: monospace;
+    font-size: 7px;
+    color: #555;
+    text-align: center;
+    margin: 3px 0 1px;
+    letter-spacing: 1px;
+  }
+  .shared-blocks {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    gap: 1px;
+    padding: 0 6px;
+    margin-bottom: 3px;
+  }
+  .blk {
+    height: 9px;
+    position: relative;
+  }
+  .blk::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.25);
+  }
+  .blk-y  { background: #fa0; }
+  .blk-dy { background: #c80; }
+
+  /* Per-egg columns */
+  .columns-area {
+    display: flex;
+    gap: 4px;
+    padding: 0 6px;
+    margin-bottom: 3px;
+  }
+  .col { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+  .col-label {
+    font-family: monospace;
+    font-size: 7px;
+    text-align: center;
+    margin-bottom: 2px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+  .col-label-r { color: #f44; }
+  .col-label-c { color: #0ff; }
+  .col-label-g { color: #0f0; }
+
+  .blk-r  { background: #f00; }
+  .blk-dr { background: #900; }
+  .blk-c  { background: #0cc; }
+  .blk-dc { background: #077; }
+  .blk-g  { background: #0a0; }
+  .blk-dg { background: #060; }
+  .blk-m  { background: #f0f; }
+  .blk-o  { background: #f60; }
+
+  /* Play field */
+  .field {
+    height: 56px;
+    background: #000;
+    position: relative;
+  }
+  .ball {
+    width: 5px; height: 5px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 22px;
+    left: calc(50% - 2px);
+  }
+
+  /* Paddle */
+  .paddle-row {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 6px;
+  }
+  .paddle {
+    width: 52px;
+    height: 7px;
+    background: #fff;
+    border-radius: 0;
+  }
+
+  /* Lives */
+  .lives-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 8px 0;
+    gap: 4px;
+  }
+  .life-dot {
+    width: 7px; height: 7px;
+    background: #ff0;
+    border-radius: 0;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  }
+
+  /* Q section */
+  .q-section {
+    margin-top: 18px;
+    width: 100%;
+    max-width: 540px;
+  }
+  .q-title {
+    color: #ff0;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .q-option {
+    background: #000;
+    border: 2px solid #444;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: border-color 0.1s;
+  }
+  .q-option:hover { border-color: #0f0; }
+  .q-option.selected { border-color: #ff0; background: #111; }
+  .q-letter {
+    color: #ff0;
+    font-family: monospace;
+    font-size: 13px;
+    min-width: 24px;
+    font-weight: bold;
+  }
+  .q-text h3 { color: #fff; font-family: monospace; font-size: 11px; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+  .q-text p  { color: #888; font-family: monospace; font-size: 10px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h2>⬛ PHASE 1 — INCUBATION CHAMBER ⬛</h2>
+<p class="subtitle">16-BIT RETRO ARCADE LAYOUT &nbsp;|&nbsp; NO MORE COLORS THAN ARKANOID</p>
+
+<div class="screen">
+  <!-- Score -->
+  <div class="score-bar">HIGH SCORE &nbsp;&nbsp;<span>50000</span></div>
+
+  <!-- Eggs -->
+  <div class="eggs-row">
+    <div class="egg-wrap">
+      <div class="egg egg-red"></div>
+      <div class="egg-label" style="color:#f44;">CRIMSON</div>
+    </div>
+    <div class="egg-wrap">
+      <div class="egg egg-cyan"></div>
+      <div class="egg-label" style="color:#0ff;">OBSIDIAN</div>
+    </div>
+    <div class="egg-wrap">
+      <div class="egg egg-green"></div>
+      <div class="egg-label" style="color:#0f0;">IVORY</div>
+    </div>
+  </div>
+
+  <!-- Shared block mass -->
+  <div class="shared-label">— THERMAL SEAL —</div>
+  <div class="shared-blocks">
+    <!-- row 1 -->
+    <div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div>
+    <!-- row 2 -->
+    <div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div><div class="blk blk-y"></div>
+    <!-- row 3 -->
+    <div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div><div class="blk blk-dy"></div>
+  </div>
+
+  <!-- Per-egg columns -->
+  <div class="columns-area">
+    <!-- CRIMSON — dense, packed, many blocks -->
+    <div class="col">
+      <div class="col-label col-label-r">CRIM</div>
+      <div class="blk blk-r"></div><div class="blk blk-r"></div><div class="blk blk-dr"></div>
+      <div class="blk blk-r"></div><div class="blk blk-r"></div><div class="blk blk-dr"></div>
+      <div class="blk blk-r"></div><div class="blk blk-r"></div>
+      <div class="blk blk-dr"></div><div class="blk blk-dr"></div>
+    </div>
+    <!-- OBSIDIAN — most blocks, hardest, using magenta/gray -->
+    <div class="col">
+      <div class="col-label col-label-c">OBSD</div>
+      <div class="blk blk-c"></div><div class="blk blk-c"></div><div class="blk blk-dc"></div>
+      <div class="blk blk-c"></div><div class="blk blk-c"></div><div class="blk blk-dc"></div>
+      <div class="blk blk-c"></div><div class="blk blk-c"></div>
+      <div class="blk blk-dc"></div><div class="blk blk-dc"></div>
+      <div class="blk blk-c"></div><div class="blk blk-c"></div>
+      <div class="blk blk-dc"></div>
+    </div>
+    <!-- IVORY — fewest blocks, spaced, easier -->
+    <div class="col">
+      <div class="col-label col-label-g">IVRY</div>
+      <div class="blk blk-g"></div><div class="blk blk-g"></div><div class="blk blk-dg"></div>
+      <div class="blk blk-g"></div><div class="blk blk-g"></div><div class="blk blk-dg"></div>
+      <div class="blk blk-g"></div>
+    </div>
+  </div>
+
+  <!-- Play field -->
+  <div class="field">
+    <div class="ball"></div>
+  </div>
+
+  <!-- Paddle -->
+  <div class="paddle-row">
+    <div class="paddle"></div>
+  </div>
+
+  <!-- Lives -->
+  <div class="lives-row">
+    <div class="life-dot"></div>
+    <div class="life-dot"></div>
+    <div class="life-dot"></div>
+  </div>
+</div>
+
+<!-- Design questions -->
+<div class="q-section">
+  <div class="q-title">▶ DESIGN QUESTIONS</div>
+
+  <div class="q-option" onclick="this.classList.toggle('selected')">
+    <div class="q-letter">Q1</div>
+    <div class="q-text">
+      <h3>Block count = egg difficulty?</h3>
+      <p>Obsidian = most blocks (13), Crimson = medium (10), Ivory = fewest (7).<br>More blocks = longer to hatch, but more warmth particles hit the egg.<br>Keep this asymmetry or make all equal?</p>
+    </div>
+  </div>
+
+  <div class="q-option" onclick="this.classList.toggle('selected')">
+    <div class="q-letter">Q2</div>
+    <div class="q-text">
+      <h3>Warmth particles — keep or cut?</h3>
+      <p>Spec says broken blocks release particles that drift down to the egg.<br>Nice visual feedback. Worth implementing or too complex for v1?</p>
+    </div>
+  </div>
+
+  <div class="q-option" onclick="this.classList.toggle('selected')">
+    <div class="q-letter">Q3</div>
+    <div class="q-text">
+      <h3>"Direct hit to hatch" — keep or auto-hatch?</h3>
+      <p>Spec requires: clear all blocks → then land a direct hit on the egg.<br>Satisfying "killing blow" moment. OR: auto-hatch when last block clears?</p>
+    </div>
+  </div>
+
+  <div class="q-option" onclick="this.classList.toggle('selected')">
+    <div class="q-letter">Q4</div>
+    <div class="q-text">
+      <h3>Fail state: blocks regenerate or lives system?</h3>
+      <p>Current spec: miss ball 3× → some blocks partially regenerate (setback, not game over).<br>Alternative: classic 3 lives, lose one on each miss, game resets Phase 1 on 0 lives.</p>
+    </div>
+  </div>
+
+</div>
+
+<p style="color:#555;font-family:monospace;font-size:10px;text-align:center;margin-top:14px;letter-spacing:1px;">
+  CLICK QUESTIONS TO FLAG THEM &nbsp;|&nbsp; OR ANSWER IN TERMINAL
+</p>
+
+</body>
+</html>

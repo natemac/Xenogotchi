@@ -1,0 +1,13 @@
+{
+  "emails": [
+    {
+      "id": "welcome_briefing",
+      "from": "BIOPET.DIV@WEYLAND-YUTANI.COM",
+      "to_label": "EMPLOYEE",
+      "subject": "PROGRAM ENROLLMENT — MANDATORY READ",
+      "trigger": "game_start",
+      "pre_unlocked": true,
+      "body": "WEYLAND-YUTANI CORP\nBIOPET DIVISION — INTERACTIVE TRAINING TOOL\n\nWELCOME, EMPLOYEE.\n\nYou have been selected for the BIOPET\nDivision. This is a positive outcome.\n\nSelection criteria included your\ndedication, work ethic, and\n{RANDOMIZED PERFORMANCE TRAIT#3}.\n\nYou will oversee the development of a\ncompany biopet through feeding,\ntraining, and guided interaction.\n\nWith proper care, your specimen may\nreach full maturity.\n\nWith improper care, your specimen may\nstill reach full maturity.\n\nBoth outcomes are useful."
+    }
+  ]
+}

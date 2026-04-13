@@ -1,0 +1,42 @@
+<h2>Phase 1 — Egg Layout Question</h2>
+<p class="subtitle">The spec says all 3 eggs are visible simultaneously, each with their own block cluster. But on mobile portrait (the primary target), this creates a real tension: the player is supposed to <strong>strategically aim for one specific egg</strong> — but Breakout ball control is famously imprecise. Which layout approach makes more sense?</p>
+
+<div class="options">
+  <div class="option" data-choice="all-three" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>All 3 Eggs Visible Simultaneously (Original Spec)</h3>
+      <p>3 eggs + block clusters fill the upper screen. Player uses a single paddle across the full width. "Aiming" means nudging ball left/right to favor one egg's cluster. First egg fully hatched wins — others fade.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Keeps</h4><ul><li>Classic Breakout feel</li><li>Visual choice is immediate — you see all 3 paths</li></ul></div>
+        <div class="cons"><h4>Risk</h4><ul><li>Mobile screen is narrow — 3 eggs + blocks = tiny hitboxes</li><li>"Aiming" in Breakout is indirect, so choice feels random</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="choose-first" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Choose First, Then Play</h3>
+      <p>Before the Breakout game starts, player taps the egg they want to hatch. The chosen egg fills the screen with its unique block layout. The other two eggs are shown as small locked icons. Game plays as a focused single-egg Breakout.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Keeps</h4><ul><li>Explicit meaningful choice</li><li>Full mobile screen for Breakout — bigger, more playable</li><li>Each egg can have a unique, distinctive block pattern</li></ul></div>
+        <div class="cons"><h4>Risk</h4><ul><li>Choice is divorced from gameplay — less emergent</li><li>Loses the "race" tension between eggs</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="race-scroll" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Sequential Swipe — One Egg at a Time, Race Logic</h3>
+      <p>Only one egg + its blocks fill the screen. Player swipes left/right to switch which egg is "active." Progress on each egg is tracked independently. First egg to reach 100% breaks and hatches.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Keeps</h4><ul><li>Full mobile screen per egg — large, readable</li><li>Strategic switching adds depth (work on easier egg vs. risk-reward)</li><li>Race tension preserved — all 3 are in play</li></ul></div>
+        <div class="cons"><h4>Risk</h4><ul><li>More complex UX to explain</li><li>Swipe-to-switch conflicts with swipe-to-aim</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:1rem;">Click your preference or tell me in the terminal. No wrong answer — just want to establish the layout before we go deeper.</p>

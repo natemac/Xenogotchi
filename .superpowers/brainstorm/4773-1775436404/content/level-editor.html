@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XenoGotchi — Arkanoid Level Editor</title>
+  <style>
+    :root {
+      --bg-dark: #00152b;
+      --bg-line: #0060ff;
+      --steel-light: #d8d8d8;
+      --steel-mid:   #9a9a9a;
+      --steel-dark:  #666;
+      --rail-w: 15px;
+      --cols: 12;
+      --rows: 16;
+      --cell: 30px;
+      --gap:  2px;
+      --game-w: calc(var(--rail-w)*2 + var(--cols)*var(--cell) + (var(--cols) - 1)*var(--gap));
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #ccc;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      gap: 16px;
+    }
+
+    h1 {
+      color: #ff4a1f;
+      font-size: 16px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px #ff4a1f88;
+    }
+
+    .workspace {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ── GAME FRAME ── */
+    .game-frame {
+      position: relative;
+      width: var(--game-w);
+      background:
+        repeating-linear-gradient(90deg, var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        repeating-linear-gradient( 0deg, var(--bg-line) 0 2px, transparent 2px 28px, var(--bg-line) 28px 30px, transparent 30px 56px),
+        var(--bg-dark);
+      border: 3px solid #333;
+      user-select: none;
+    }
+
+    .rail {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: var(--rail-w);
+      background: linear-gradient(90deg, var(--steel-dark), var(--steel-light), var(--steel-mid), var(--steel-light), var(--steel-dark));
+      z-index: 10;
+    }
+    .rail.left  { left: 0; }
+    .rail.right { right: 0; }
+    .rail::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(180deg,
+        rgba(255,255,255,.2) 0 14px, rgba(0,0,0,.35) 14px 16px,
+        rgba(255,255,255,.1) 16px 30px, rgba(0,0,0,.45) 30px 32px);
+      mix-blend-mode: multiply;
+    }
+
+    /* header area */
+    .frame-header {
+      padding: 6px var(--rail-w);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1a3060;
+    }
+    .frame-header .score-lbl { color: #ff4a1f; font-size: 12px; letter-spacing: 1px; }
+    .frame-header .score-val { color: #fff; font-size: 16px; }
+    .frame-header .lives { display: flex; gap: 5px; align-items: center; }
+    .life-icon {
+      width: 8px; height: 14px;
+      border-radius: 50% 50% 45% 45%;
+      background: #fff;
+      position: relative;
+    }
+    .life-icon::after {
+      content: '';
+      position: absolute;
+      left: 2px; bottom: -4px;
+      width: 3px; height: 5px;
+      background: #fff;
+      border-radius: 0 0 50% 50%;
+    }
+
+    /* top pipe -->  */
+    .frame-pipes {
+      padding: 6px var(--rail-w) 0;
+      display: flex;
+      gap: 0;
+      align-items: center;
+    }
+    .pipe-seg {
+      height: 12px;
+      flex: 1;
+      background: linear-gradient(180deg, #e4e4e4, #9f9f9f 45%, #d8d8d8 46%, #7d7d7d);
+      border-radius: 6px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.35);
+    }
+    .pipe-gap { flex: 0.5; }
+
+    /* eggs */
+    .frame-eggs {
+      padding: 8px var(--rail-w) 4px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .egg-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .egg-shape {
+      width: 26px; height: 36px;
+      border-radius: 50% 50% 48% 48% / 58% 58% 42% 42%;
+      box-shadow: inset -3px -5px 0 rgba(0,0,0,.22), inset 3px 5px 0 rgba(255,255,255,.1);
+    }
+    .egg-shape.crimson  { background: #f33; }
+    .egg-shape.obsidian { background: #5ce7ff; }
+    .egg-shape.ivory    { background: #3cff3c; }
+    .egg-label { font-size: 8px; letter-spacing: 1px; color: #aaa; text-transform: uppercase; }
+
+    /* ── EDITABLE BRICK GRID ── */
+    .brick-area {
+      padding: 4px var(--rail-w);
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(var(--cols), var(--cell));
+      gap: var(--gap);
+      cursor: crosshair;
+    }
+
+    .cell {
+      width: var(--cell);
+      height: 16px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: background 0.05s;
+      position: relative;
+    }
+
+    .cell.filled::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,.25);
+      pointer-events: none;
+    }
+
+    /* strength overlay dots */
+    .cell[data-str="2"]::before { content: '●'; position: absolute; right: 2px; bottom: 0; font-size: 7px; color: rgba(255,255,255,.5); line-height: 1; pointer-events: none; }
+    .cell[data-str="3"]::before { content: '●●'; position: absolute; right: 2px; bottom: 0; font-size: 7px; color: rgba(255,255,255,.5); line-height: 1; pointer-events: none; }
+
+    /* zone separator line */
+    .zone-divider {
+      padding: 2px var(--rail-w);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: #555;
+    }
+    .zone-divider::before, .zone-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #333;
+    }
+
+    /* frame footer: paddle */
+    .frame-footer {
+      padding: 20px var(--rail-w) 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .paddle-shape {
+      width: 54px; height: 13px;
+      background: linear-gradient(180deg, #ffa65c, #e86615);
+      border: 1px solid #8f3900;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 2px 0 rgba(0,0,0,.35);
+      position: relative;
+      border-radius: 1px;
+    }
+    .paddle-shape::before, .paddle-shape::after {
+      content: '';
+      position: absolute; top: 2px;
+      width: 8px; height: 9px;
+      background: #d6eefb;
+      border: 1px solid #6aa0b8;
+    }
+    .paddle-shape::before { left: 2px; }
+    .paddle-shape::after  { right: 2px; }
+    .lives-row { display: flex; gap: 5px; }
+
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 200px;
+    }
+
+    .panel {
+      background: #111;
+      border: 1px solid #2a2a2a;
+      padding: 12px;
+    }
+
+    .panel-title {
+      color: #ff4a1f;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 6px;
+    }
+
+    /* COLOR PALETTE */
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+    }
+
+    .swatch {
+      width: 100%;
+      aspect-ratio: 1.6;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.1s, transform 0.1s;
+      position: relative;
+    }
+    .swatch::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,.25);
+    }
+    .swatch:hover    { transform: scale(1.1); }
+    .swatch.active   { border-color: #fff; transform: scale(1.12); }
+
+    .swatch.eraser {
+      background: transparent !important;
+      border: 2px dashed #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .swatch.eraser.active { border-color: #fff; }
+    .swatch.eraser::after { display: none; }
+
+    /* STRENGTH */
+    .strength-row {
+      display: flex;
+      gap: 5px;
+    }
+    .str-btn {
+      flex: 1;
+      padding: 5px 0;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #888;
+      font-family: monospace;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.1s;
+    }
+    .str-btn:hover { border-color: #888; color: #fff; }
+    .str-btn.active { border-color: #ff4a1f; color: #ff4a1f; background: #1a0d00; }
+
+    /* ACTIONS */
+    .action-btn {
+      width: 100%;
+      padding: 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #ccc;
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 5px;
+      transition: all 0.1s;
+    }
+    .action-btn:hover { border-color: #fff; color: #fff; background: #222; }
+    .action-btn.danger { border-color: #500; color: #f55; }
+    .action-btn.danger:hover { background: #1a0000; border-color: #f55; }
+    .action-btn.primary { border-color: #0a4; color: #0f0; }
+    .action-btn.primary:hover { background: #001a05; border-color: #0f0; }
+
+    /* LEGEND */
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 5px;
+      font-size: 10px;
+      color: #888;
+    }
+    .legend-swatch {
+      width: 18px; height: 11px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .legend-swatch::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: rgba(255,255,255,.25);
+    }
+
+    /* OUTPUT */
+    #output {
+      width: 100%;
+      height: 80px;
+      background: #000;
+      border: 1px solid #333;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 9px;
+      padding: 5px;
+      resize: none;
+      display: none;
+    }
+
+    /* ZONE LABELS in sidebar */
+    .zone-info {
+      font-size: 10px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .zone-info span { color: #aaa; }
+
+    /* STATUS BAR */
+    #statusbar {
+      font-size: 10px;
+      color: #555;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h1>⬛ XenoGotchi — Level Editor ⬛</h1>
+<div id="statusbar">LEFT CLICK: paint &nbsp;|&nbsp; RIGHT CLICK: erase &nbsp;|&nbsp; DRAG to fill</div>
+
+<div class="workspace">
+
+  <!-- GAME FRAME -->
+  <div class="game-frame" id="gameFrame">
+    <div class="rail left"></div>
+    <div class="rail right"></div>
+
+    <!-- Header -->
+    <div class="frame-header">
+      <div class="lives">
+        <div class="life-icon"></div>
+        <div class="life-icon"></div>
+      </div>
+      <div style="text-align:center">
+        <div class="score-lbl">HIGH SCORE</div>
+        <div class="score-val">000000</div>
+      </div>
+      <div style="width:30px"></div>
+    </div>
+
+    <!-- Pipes -->
+    <div class="frame-pipes">
+      <div class="pipe-seg"></div>
+      <div class="pipe-gap"></div>
+      <div class="pipe-seg"></div>
+    </div>
+
+    <!-- Eggs -->
+    <div class="frame-eggs">
+      <div class="egg-slot">
+        <div class="egg-shape crimson"></div>
+        <div class="egg-label">Crimson</div>
+      </div>
+      <div class="egg-slot">
+        <div class="egg-shape obsidian"></div>
+        <div class="egg-label">Obsidian</div>
+      </div>
+      <div class="egg-slot">
+        <div class="egg-shape ivory"></div>
+        <div class="egg-label">Ivory</div>
+      </div>
+    </div>
+
+    <div class="zone-divider">THERMAL SEAL</div>
+
+    <!-- EDITABLE GRID -->
+    <div class="brick-area">
+      <div id="grid"></div>
+    </div>
+
+    <div class="zone-divider">PLAY FIELD</div>
+
+    <!-- Footer / paddle -->
+    <div class="frame-footer">
+      <div class="paddle-shape"></div>
+      <div class="lives-row">
+        <div class="life-icon"></div>
+        <div class="life-icon"></div>
+        <div class="life-icon"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- COLOR PALETTE -->
+    <div class="panel">
+      <div class="panel-title">Color</div>
+      <div class="palette" id="palette"></div>
+    </div>
+
+    <!-- STRENGTH -->
+    <div class="panel">
+      <div class="panel-title">Brick Strength</div>
+      <div class="strength-row" id="strengthRow">
+        <button class="str-btn active" data-str="1">1 hit</button>
+        <button class="str-btn" data-str="2">2 hits</button>
+        <button class="str-btn" data-str="3">3 hits</button>
+      </div>
+      <div style="font-size:9px;color:#444;margin-top:8px;line-height:1.5;">
+        Strength shown as dots on brick.<br>Multi-hit bricks darken on each hit.
+      </div>
+    </div>
+
+    <!-- ZONE INFO -->
+    <div class="panel">
+      <div class="panel-title">Zone Guide</div>
+      <div class="zone-info">
+        <span>Top rows</span> = Shared thermal seal<br>
+        (all 3 eggs must clear these)<br><br>
+        <span>Bottom rows</span> = Per-egg columns<br>
+        (use egg colors to show which column belongs to which egg)<br><br>
+        Color key:<br>
+        <span style="color:#f33">■</span> Crimson egg zone<br>
+        <span style="color:#5ce7ff">■</span> Obsidian egg zone<br>
+        <span style="color:#3cff3c">■</span> Ivory egg zone<br>
+        <span style="color:#d5c81b">■</span> Shared / neutral
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="panel">
+      <div class="panel-title">Actions</div>
+      <button class="action-btn primary" onclick="exportLayout()">Export JSON</button>
+      <button class="action-btn primary" onclick="copyLayout()">Copy to Clipboard</button>
+      <button class="action-btn" onclick="fillShared()">Fill Shared Zone (rows 1-3)</button>
+      <button class="action-btn" onclick="fillColumns()">Fill Egg Columns (rows 4+)</button>
+      <button class="action-btn danger" onclick="clearGrid()">Clear All</button>
+      <textarea id="output" readonly></textarea>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ── CONFIG ──
+  const COLS = 12;
+  const ROWS = 16;
+
+  const COLORS = [
+    { id: 'yellow',  hex: '#d5c81b', label: 'Thermal Seal' },
+    { id: 'orange',  hex: '#f5821f', label: 'Orange' },
+    { id: 'red',     hex: '#ff4a3c', label: 'Crimson Egg' },
+    { id: 'cyan',    hex: '#5ce7ff', label: 'Obsidian Egg' },
+    { id: 'green',   hex: '#3cff3c', label: 'Ivory Egg' },
+    { id: 'pink',    hex: '#ff76ef', label: 'Pink' },
+    { id: 'blue',    hex: '#78bcff', label: 'Blue' },
+    { id: 'white',   hex: '#d8d8d8', label: 'White' },
+    { id: 'gray',    hex: '#888888', label: 'Gray' },
+    { id: 'darkred', hex: '#8b0000', label: 'Dark Red' },
+    { id: 'teal',    hex: '#007a7a', label: 'Dark Cyan' },
+    { id: 'eraser',  hex: null,      label: 'Erase' },
+  ];
+
+  // state
+  let grid = [];         // grid[row][col] = { color, str } or null
+  let painting = false;
+  let paintMode = 'fill'; // 'fill' or 'erase'
+  let currentColor = COLORS[0];
+  let currentStrength = 1;
+
+  // ── BUILD GRID DATA ──
+  for (let r = 0; r < ROWS; r++) {
+    grid[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      grid[r][c] = null;
+    }
+  }
+
+  // ── BUILD PALETTE ──
+  const paletteEl = document.getElementById('palette');
+  COLORS.forEach(col => {
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (col.id === 'eraser' ? ' eraser' : '') + (col === currentColor ? ' active' : '');
+    sw.title = col.label;
+    if (col.hex) sw.style.background = col.hex;
+    else sw.textContent = '✕';
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      currentColor = col;
+      updateStatus();
+    });
+    paletteEl.appendChild(sw);
+  });
+
+  // ── BUILD GRID CELLS ──
+  const gridEl = document.getElementById('grid');
+  const cells = [];
+
+  for (let r = 0; r < ROWS; r++) {
+    cells[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      gridEl.appendChild(cell);
+      cells[r][c] = cell;
+    }
+  }
+
+  // ── PAINT LOGIC ──
+  function paintCell(r, c, forceErase) {
+    const erase = forceErase || currentColor.id === 'eraser';
+    if (erase) {
+      grid[r][c] = null;
+      cells[r][c].className = 'cell';
+      cells[r][c].style.background = '';
+      cells[r][c].removeAttribute('data-str');
+    } else {
+      grid[r][c] = { color: currentColor.hex, colorId: currentColor.id, str: currentStrength };
+      cells[r][c].className = 'cell filled';
+      cells[r][c].style.background = currentColor.hex;
+      cells[r][c].dataset.str = currentStrength;
+    }
+  }
+
+  // Mouse events on grid
+  gridEl.addEventListener('mousedown', e => {
+    if (e.button !== 0 && e.button !== 2) return;
+    e.preventDefault();
+    painting = true;
+    paintMode = e.button === 2 ? 'erase' : 'fill';
+    const cell = e.target.closest('.cell');
+    if (cell) paintCell(+cell.dataset.r, +cell.dataset.c, paintMode === 'erase');
+  });
+
+  gridEl.addEventListener('mousemove', e => {
+    if (!painting) return;
+    const cell = e.target.closest('.cell');
+    if (cell) paintCell(+cell.dataset.r, +cell.dataset.c, paintMode === 'erase');
+  });
+
+  window.addEventListener('mouseup', () => { painting = false; });
+  gridEl.addEventListener('contextmenu', e => e.preventDefault());
+
+  // ── STRENGTH BUTTONS ──
+  document.getElementById('strengthRow').addEventListener('click', e => {
+    const btn = e.target.closest('.str-btn');
+    if (!btn) return;
+    document.querySelectorAll('.str-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentStrength = +btn.dataset.str;
+    updateStatus();
+  });
+
+  // ── FILL HELPERS ──
+  function fillShared() {
+    // rows 0-2 in yellow
+    const yellow = COLORS.find(c => c.id === 'yellow');
+    const savedColor = currentColor;
+    const savedStr = currentStrength;
+    currentColor = yellow;
+    currentStrength = 1;
+    for (let r = 0; r < 3; r++)
+      for (let c = 0; c < COLS; c++)
+        paintCell(r, c, false);
+    currentColor = savedColor;
+    currentStrength = savedStr;
+  }
+
+  function fillColumns() {
+    // Crimson: cols 0-2, Obsidian: cols 4-7, Ivory: cols 9-11, rows 4-10
+    const colorMap = [
+      { cols: [0, 1, 2],       colorId: 'red',   rows: 4, count: 10 },
+      { cols: [4, 5, 6, 7],    colorId: 'cyan',  rows: 4, count: 13 },
+      { cols: [9, 10, 11],     colorId: 'green', rows: 4, count: 7  },
+    ];
+    colorMap.forEach(zone => {
+      const col = COLORS.find(c => c.id === zone.colorId);
+      const savedColor = currentColor;
+      const savedStr = currentStrength;
+      currentColor = col;
+      currentStrength = 1;
+      let placed = 0;
+      for (let r = zone.rows; r < ROWS && placed < zone.count; r++) {
+        for (let c2 = 0; c2 < zone.cols.length && placed < zone.count; c2++) {
+          paintCell(r, zone.cols[c2], false);
+          placed++;
+        }
+      }
+      currentColor = savedColor;
+      currentStrength = savedStr;
+    });
+  }
+
+  function clearGrid() {
+    for (let r = 0; r < ROWS; r++)
+      for (let c = 0; c < COLS; c++) {
+        grid[r][c] = null;
+        cells[r][c].className = 'cell';
+        cells[r][c].style.background = '';
+        cells[r][c].removeAttribute('data-str');
+      }
+  }
+
+  // ── EXPORT ──
+  function getLayoutData() {
+    return {
+      cols: COLS,
+      rows: ROWS,
+      bricks: grid.map((row, r) =>
+        row.map((cell, c) => cell ? { r, c, color: cell.color, colorId: cell.colorId, str: cell.str } : null)
+           .filter(Boolean)
+      ).flat()
+    };
+  }
+
+  function exportLayout() {
+    const out = document.getElementById('output');
+    out.style.display = 'block';
+    out.value = JSON.stringify(getLayoutData(), null, 2);
+  }
+
+  function copyLayout() {
+    const data = JSON.stringify(getLayoutData(), null, 2);
+    navigator.clipboard.writeText(data).then(() => {
+      updateStatus('✓ Copied to clipboard!');
+      setTimeout(updateStatus, 2000);
+    });
+  }
+
+  // ── STATUS ──
+  function updateStatus(msg) {
+    const bar = document.getElementById('statusbar');
+    if (msg) { bar.textContent = msg; return; }
+    const colorName = currentColor.label;
+    const erase = currentColor.id === 'eraser';
+    const brickCount = grid.flat().filter(Boolean).length;
+    bar.textContent = erase
+      ? `MODE: ERASE  |  BRICKS: ${brickCount}`
+      : `COLOR: ${colorName.toUpperCase()}  |  STRENGTH: ${currentStrength}  |  BRICKS: ${brickCount}`;
+  }
+
+  updateStatus();
+</script>
+</body>
+</html>

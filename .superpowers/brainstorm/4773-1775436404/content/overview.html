@@ -1,0 +1,63 @@
+<h2>Xeno-Gotchi Design Review</h2>
+<p class="subtitle">I've read through both your Design Spec and Roadmap. Below are the major areas of the design. Select any that feel <strong>incomplete, unclear, or in need of a rethink</strong> — we'll go through them one at a time.</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="phase1" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Phase 1 — The Egg (Breakout/Arkanoid)</h3>
+      <p>3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier</p>
+    </div>
+  </div>
+  <div class="option" data-choice="phase2" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Phase 2 — The Facehugger (Memory → Frogger → Pac-Man)</h3>
+      <p>3-part phase: location memory match, bait selection crossing, and host hunt. Location + bait determines species.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="phase3" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>Phase 3 — The Chestburster (Vent Stalker)</h3>
+      <p>Dual-meter system (Hunger + Life), repeatable stealth rounds, one-strike rule, marine AI, idle drain</p>
+    </div>
+  </div>
+  <div class="option" data-choice="phase4" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>Phase 4 — The Adult (Idle Pet)</h3>
+      <p>Feed/Play/Observe buttons, minigames (Hunt, Cocoon, Fight), Ferocity meter — currently the least detailed phase</p>
+    </div>
+  </div>
+  <div class="option" data-choice="evolution" onclick="toggleSelect(this)">
+    <div class="letter">5</div>
+    <div class="content">
+      <h3>Evolution & Lure System</h3>
+      <p>12 species × 3 egg variants = 36 combos. Location + Bait = species. Egg = stat modifier. Full table exists.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="ux" onclick="toggleSelect(this)">
+    <div class="letter">6</div>
+    <div class="content">
+      <h3>UI / Device Shell / Art Direction</h3>
+      <p>Ovomorph handheld shell, pixel art aesthetic, SIGNAL: 2122 vibe toggle (color ↔ monochrome), mobile-first layout</p>
+    </div>
+  </div>
+  <div class="option" data-choice="tech" onclick="toggleSelect(this)">
+    <div class="letter">7</div>
+    <div class="content">
+      <h3>Tech Stack & Architecture</h3>
+      <p>Vanilla JS, Canvas, localStorage, state machine. Single-file approach (game.js). No build tools.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="scope" onclick="toggleSelect(this)">
+    <div class="letter">8</div>
+    <div class="content">
+      <h3>Scope & Build Order</h3>
+      <p>The roadmap is everything-at-once. No prioritized MVP. Nothing is built yet — this affects where to start.</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 1.5rem;">You can select multiple. Or tell me in the terminal if you want to start somewhere specific.</p>

@@ -1,0 +1,96 @@
+/* ── PHASE 1 LAYOUT ── */
+.phase1-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: env(safe-area-inset-bottom, 10px);
+}
+
+/* ── HUD BAR ── */
+.hud-bar {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 7px;
+  letter-spacing: 1px;
+  color: #888;
+  padding: 4px 10px;
+}
+.hud-bar .hud-title { color: #ffe600; font-size: 6px; letter-spacing: 2px; }
+.hud-bar .stat      { color: #5ce7ff; }
+.hud-bar .stat span { color: #fff; }
+
+/* ── GAME WRAP — 5% horizontal crop ── */
+.game-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2% 5%;
+}
+
+/* ── GAME FRAME ── */
+.game-frame {
+  position: relative;
+  flex: 1;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+/* ── GAME CANVAS — scaled via JS ── */
+#gameCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: top left;
+}
+
+/* ── MESSAGE OVERLAY ── */
+#msgOverlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.82);
+  gap: 18px;
+  z-index: 10;
+}
+#msgOverlay.visible { display: flex; }
+
+.overlay-title {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+.overlay-title.green  { color: #3cff3c; text-shadow: 0 0 12px #3cff3c88; }
+.overlay-title.yellow { color: #ffe600; text-shadow: 0 0 12px #ffe60088; }
+.overlay-title.red    { color: #ff4a3c; }
+
+.overlay-egg { width: 60px; height: 86px; }
+
+.overlay-sub {
+  font-size: 7px;
+  color: #888;
+  letter-spacing: 2px;
+  text-align: center;
+  line-height: 2.2;
+}
+
+.overlay-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  background: #000;
+  color: #ffe600;
+  border: 2px solid #ffe600;
+  padding: 10px 20px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.overlay-btn:hover  { background: #ffe600; color: #000; }
+.overlay-btn:active { background: #cca800; color: #000; }

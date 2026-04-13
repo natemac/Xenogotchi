@@ -1,0 +1,355 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { background: #0a0a0a; }
+
+  .q-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #ffff00;
+    margin-bottom: 6px;
+    text-shadow: 2px 2px 0 #7a6e00;
+  }
+  .q-sub {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 7px;
+    color: #888;
+    margin-bottom: 28px;
+    line-height: 2;
+    letter-spacing: 1px;
+  }
+
+  /* ── REAL TASKBAR PREVIEW ── */
+  .bar-preview {
+    background: #000;
+    border: 1px solid #1f6b1f;
+    border-bottom: 2px solid #3cff3c;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    height: 36px;
+    margin-bottom: 28px;
+    font-family: 'Press Start 2P', monospace;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .bar-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bar-title {
+    font-size: 7px;
+    color: #3cff3c;
+    letter-spacing: 2px;
+    opacity: 0.7;
+  }
+
+  .bar-phase {
+    font-size: 5px;
+    color: #1f6b1f;
+    letter-spacing: 1px;
+    border: 1px solid #1f6b1f;
+    padding: 2px 5px;
+  }
+
+  .bar-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .bar-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px;
+    color: #3cff3c;
+    background: none;
+    border: none;
+    padding: 4px 7px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    position: relative;
+    opacity: 0.9;
+  }
+
+  .bar-btn:hover { color: #fff; background: #0a200a; }
+
+  .bar-icon {
+    width: 14px;
+    height: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* pixel envelope icon */
+  .icon-mail {
+    width: 14px;
+    height: 10px;
+    border: 2px solid #3cff3c;
+    position: relative;
+  }
+  .icon-mail::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 5px solid #3cff3c;
+  }
+
+  /* pixel gear icon */
+  .icon-gear {
+    width: 12px;
+    height: 12px;
+    border: 2px solid #3cff3c;
+    border-radius: 50%;
+    position: relative;
+  }
+  .icon-gear::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 4px;
+    height: 4px;
+    background: #3cff3c;
+    border-radius: 50%;
+  }
+
+  /* pixel floppy icon */
+  .icon-save {
+    width: 12px;
+    height: 13px;
+    border: 2px solid #3cff3c;
+    position: relative;
+    background: none;
+  }
+  .icon-save::before {
+    content: '';
+    position: absolute;
+    top: 1px; right: 1px;
+    width: 4px;
+    height: 5px;
+    border: 1px solid #3cff3c;
+  }
+  .icon-save::after {
+    content: '';
+    position: absolute;
+    bottom: 1px; left: 1px; right: 1px;
+    height: 4px;
+    border: 1px solid #3cff3c;
+  }
+
+  /* pixel book/codex icon */
+  .icon-codex {
+    width: 10px;
+    height: 13px;
+    border: 2px solid #3cff3c;
+    border-left: 4px solid #3cff3c;
+    position: relative;
+  }
+  .icon-codex::before {
+    content: '';
+    position: absolute;
+    top: 2px; left: 1px; right: 1px;
+    height: 1px;
+    background: #3cff3c;
+    box-shadow: 0 3px 0 #3cff3c, 0 6px 0 #3cff3c;
+  }
+
+  /* pixel heart/vitals icon */
+  .icon-vitals {
+    font-size: 11px;
+    color: #3cff3c;
+    line-height: 1;
+  }
+
+  .bar-btn-label {
+    font-size: 4px;
+    letter-spacing: 1px;
+    color: #1f6b1f;
+  }
+
+  .notify-dot {
+    position: absolute;
+    top: 1px; right: 1px;
+    width: 5px; height: 5px;
+    background: #ffff00;
+    border-radius: 0;
+    box-shadow: 0 0 4px rgba(255,255,0,0.8);
+  }
+
+  .bar-divider {
+    width: 1px;
+    height: 20px;
+    background: #1f6b1f;
+    margin: 0 3px;
+  }
+
+  /* ── OPTION CARDS ── */
+  .configs {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .cfg-card {
+    background: #050505;
+    border: 2px solid #1f6b1f;
+    padding: 14px 12px;
+    width: 155px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    transition: border-color 0.1s;
+  }
+  .cfg-card:hover { border-color: #3cff3c; }
+  .cfg-card.selected { border-color: #ffff00; box-shadow: 0 0 10px rgba(255,255,0,0.25); }
+
+  .cfg-label {
+    font-size: 7px;
+    color: #ffff00;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .cfg-items {
+    list-style: none;
+    padding: 0;
+  }
+  .cfg-items li {
+    font-size: 5px;
+    color: #3cff3c;
+    letter-spacing: 1px;
+    line-height: 2.4;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .cfg-items li::before { content: '▶'; font-size: 4px; color: #1f6b1f; }
+  .cfg-items li.new { color: #ffff00; }
+  .cfg-items li.new::before { content: '★'; color: #ffff00; }
+
+  .cfg-rec {
+    font-size: 5px;
+    color: #3cff3c;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    border: 1px solid #1f6b1f;
+    padding: 3px 5px;
+    text-align: center;
+  }
+
+  .note {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 5px;
+    color: #555;
+    letter-spacing: 1px;
+    line-height: 2.2;
+    text-align: center;
+    margin-top: 4px;
+  }
+</style>
+
+<div class="q-title">WHAT GOES IN THE TASKBAR?</div>
+<div class="q-sub">Live preview above — all green, pixel icons, no color. Pick the item set.</div>
+
+<!-- LIVE TASKBAR PREVIEW (updates with hover intent) -->
+<div class="bar-preview" id="barPreview">
+  <div class="bar-left">
+    <div class="bar-title">XENOGOTCHI</div>
+    <div class="bar-phase">PHASE I</div>
+  </div>
+  <div class="bar-right" id="barRight">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<div class="configs">
+
+  <!-- A: LEAN -->
+  <div class="cfg-card" data-choice="a" onclick="toggleSelect(this); setBar('a')">
+    <div class="cfg-label">▶ A — LEAN</div>
+    <ul class="cfg-items">
+      <li>MAIL</li>
+      <li>OPTIONS</li>
+      <li>SAVE + EXIT</li>
+    </ul>
+    <div class="cfg-rec">CLEAN / MINIMAL</div>
+  </div>
+
+  <!-- B: STANDARD -->
+  <div class="cfg-card" data-choice="b" onclick="toggleSelect(this); setBar('b')">
+    <div class="cfg-label">▶ B — STANDARD</div>
+    <ul class="cfg-items">
+      <li>MAIL</li>
+      <li class="new">CODEX</li>
+      <li>OPTIONS</li>
+      <li>SAVE + EXIT</li>
+    </ul>
+    <div class="cfg-rec">★ RECOMMENDED</div>
+  </div>
+
+  <!-- C: FULL -->
+  <div class="cfg-card" data-choice="c" onclick="toggleSelect(this); setBar('c')">
+    <div class="cfg-label">▶ C — FULL</div>
+    <ul class="cfg-items">
+      <li>MAIL</li>
+      <li class="new">VITALS</li>
+      <li class="new">CODEX</li>
+      <li>OPTIONS</li>
+      <li>SAVE + EXIT</li>
+    </ul>
+    <div class="cfg-rec">MOST INFO</div>
+  </div>
+
+</div>
+
+<div class="note">
+  MAIL = email inbox w/ notification flash &nbsp;|&nbsp; CODEX = unlockable species/lore database<br>
+  VITALS = quick-view overlay: life %, hunger %, current phase &nbsp;|&nbsp; ★ = my additions
+</div>
+
+<script>
+  function makeBtn(icon, label, hasNotify) {
+    return `<div class="bar-btn">
+      ${hasNotify ? '<div class="notify-dot"></div>' : ''}
+      <div class="bar-icon">${icon}</div>
+      <div class="bar-btn-label">${label}</div>
+    </div>`;
+  }
+
+  const ICONS = {
+    divider: '<div class="bar-divider"></div>',
+    mail:   makeBtn('<div class="icon-mail"></div>', 'MAIL', true),
+    vitals: makeBtn('<div class="icon-vitals">♥</div>', 'VITALS', false),
+    codex:  makeBtn('<div class="icon-codex"></div>', 'CODEX', false),
+    opts:   makeBtn('<div class="icon-gear"></div>', 'OPTS', false),
+    save:   makeBtn('<div class="icon-save"></div>', 'SAVE', false),
+  };
+
+  const CONFIGS = {
+    a: [ICONS.mail, ICONS.divider, ICONS.opts, ICONS.divider, ICONS.save],
+    b: [ICONS.mail, ICONS.divider, ICONS.codex, ICONS.divider, ICONS.opts, ICONS.divider, ICONS.save],
+    c: [ICONS.mail, ICONS.divider, ICONS.vitals, ICONS.divider, ICONS.codex, ICONS.divider, ICONS.opts, ICONS.divider, ICONS.save],
+  };
+
+  function setBar(cfg) {
+    document.getElementById('barRight').innerHTML = CONFIGS[cfg].join('');
+  }
+
+  // default to B
+  setBar('b');
+</script>

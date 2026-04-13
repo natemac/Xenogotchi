@@ -1,0 +1,13 @@
+- generic [ref=e23]:
+  - generic [ref=e24]: WEYLAND-YUTANI CORP. PRESENTS
+  - generic [ref=e26]: XENOGOTCHI
+  - generic [ref=e27]:
+    - generic [ref=e28] [cursor=pointer]:
+      - generic [ref=e29]: ▶
+      - generic [ref=e30]: START
+    - generic [ref=e32]: CONTINUE
+    - generic [ref=e34] [cursor=pointer]: OPTIONS
+  - generic [ref=e35]:
+    - text: © 2122 WEYLAND-YUTANI CORPORATION
+    - text: "\"BUILDING BETTER WORLDS\""
+    - text: ↑↓ MOVE ENTER SELECT

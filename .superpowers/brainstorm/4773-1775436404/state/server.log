@@ -1,0 +1,27 @@
+{"type":"server-started","port":63624,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63624","screen_dir":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content","state_dir":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/state"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/overview.html"}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436505544}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436507025}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436530625}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436662577}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436670359}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436766143}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436767109}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436848376}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436849543}
+{"source":"user-event","type":"click","text":"1\n    \n      Phase 1 — The Egg (Breakout/Arkanoid)\n      3 egg types, thermal seal blocks, ball mechanics, win/fail conditions, egg choice as stat modifier","choice":"phase1","id":null,"timestamp":1775436850126}
+{"source":"user-event","type":"click","text":"2\n    \n      Phase 2 — The Facehugger (Memory → Frogger → Pac-Man)\n      3-part phase: location memory match, bait selection crossing, and host hunt. Location + bait determines species.","choice":"phase2","id":null,"timestamp":1775436855793}
+{"source":"user-event","type":"click","text":"2\n    \n      Phase 2 — The Facehugger (Memory → Frogger → Pac-Man)\n      3-part phase: location memory match, bait selection crossing, and host hunt. Location + bait determines species.","choice":"phase2","id":null,"timestamp":1775436857426}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/phase1-layout.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/phase1-mockup.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/phase1-retro.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/phase1-reference.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v2.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v3.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v4.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v5.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v6.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v7.html"}
+{"type":"screen-added","file":"/Users/nathanmcgraw/Documents/XenoGotchi/.superpowers/brainstorm/4773-1775436404/content/level-editor-v8.html"}
+{"type":"server-stopped","reason":"idle timeout"}

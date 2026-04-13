@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>XENOGOTCHI</title>
+  <link rel="stylesheet" href="css/shell.css">
+  <link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+
+  <!-- Shared starfield — managed by shell.js, visible behind all views -->
+  <canvas id="stars"></canvas>
+
+  <!-- Taskbar — injected by shell.js, always at top once in-game -->
+  <div id="taskbar" class="hidden"></div>
+
+  <!-- Active view renders here — swapped by app.js -->
+  <div id="viewport"></div>
+
+  <!-- Overlay views render here — game stays alive underneath -->
+  <div id="overlay"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

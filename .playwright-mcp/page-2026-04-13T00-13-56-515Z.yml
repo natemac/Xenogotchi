@@ -1,0 +1,21 @@
+- generic [ref=e4]:
+  - img "Weyland-Yutani" [ref=e5]
+  - generic [ref=e6]: PRESENTS
+  - generic [ref=e7]:
+    - generic [ref=e8]: XENOGOTCHI
+    - generic [ref=e9]: BIOWEAPONS CAN BE PETS TOO
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - img "CRIMSON" [ref=e12]
+      - generic [ref=e13]: CRIMSON
+    - generic [ref=e14]:
+      - img "OBSIDIAN" [ref=e15]
+      - generic [ref=e16]: OBSIDIAN
+    - generic [ref=e17]:
+      - img "IVORY" [ref=e18]
+      - generic [ref=e19]: IVORY
+  - generic [ref=e20]:
+    - text: RAISE IT.
+    - text: FEED IT.
+    - text: FEAR IT.
+  - generic [ref=e21]: — PRESS START —

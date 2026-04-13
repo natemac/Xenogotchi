@@ -1,0 +1,152 @@
+<h2>Phase 1 — XenoGotchi Adaptation</h2>
+<p class="subtitle">Based on your Arkanoid reference: 3 eggs at top, vertical block columns below each, shared block mass in the middle. Adapted to the three egg types.</p>
+
+<div class="mockup" style="max-width: 340px; margin: 0 auto;">
+  <div class="mockup-header">INCUBATION CHAMBER — Breakout Layout (Mobile Portrait)</div>
+  <div class="mockup-body" style="background: #050a05; padding: 0; font-family: monospace; position: relative;">
+
+    <!-- Score bar -->
+    <div style="background:#000; color:#00ff41; text-align:center; font-size:11px; padding:4px 0; letter-spacing:2px; border-bottom:1px solid #1a3a1a;">
+      HIGH SCORE &nbsp;&nbsp;&nbsp; 00000
+    </div>
+
+    <!-- Eggs row -->
+    <div style="display:flex; justify-content:space-around; align-items:center; padding: 10px 8px 6px; background:#080d08;">
+      <div style="width:44px;height:60px;background:radial-gradient(ellipse at 35% 35%, #ff4444, #8b0000);border-radius:50% 50% 45% 45%;border:2px solid #ff6666;box-shadow:0 0 8px #ff000066;display:flex;align-items:center;justify-content:center;">
+        <div style="width:8px;height:8px;background:#ff8888;border-radius:50%;opacity:0.6;"></div>
+      </div>
+      <div style="width:44px;height:60px;background:radial-gradient(ellipse at 35% 35%, #aaaaaa, #111);border-radius:50% 50% 45% 45%;border:2px solid #555;box-shadow:0 0 8px #55555566;display:flex;align-items:center;justify-content:center;">
+        <div style="width:8px;height:8px;background:#888;border-radius:50%;opacity:0.6;"></div>
+      </div>
+      <div style="width:44px;height:60px;background:radial-gradient(ellipse at 35% 35%, #fffde0, #c8b87a);border-radius:50% 50% 45% 45%;border:2px solid #e8d898;box-shadow:0 0 8px #ffe08866;display:flex;align-items:center;justify-content:center;">
+        <div style="width:8px;height:8px;background:#fff8c0;border-radius:50%;opacity:0.6;"></div>
+      </div>
+    </div>
+
+    <!-- Shared block mass (gold/center) -->
+    <div style="padding: 0 8px; margin-bottom:4px;">
+      <div style="font-size:8px;color:#666;text-align:center;margin-bottom:2px;">— THERMAL SEAL (SHARED) —</div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:1px;">
+        <!-- 3 rows of shared gold blocks -->
+        <!-- Row 1 -->
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <!-- Row 2 -->
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <div style="height:10px;background:#c8a000;border:1px solid #f0c000;border-radius:1px;"></div>
+        <!-- Row 3 -->
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+        <div style="height:10px;background:#a07800;border:1px solid #c89800;border-radius:1px;"></div>
+      </div>
+    </div>
+
+    <!-- Per-egg colored columns -->
+    <div style="padding: 0 8px; display:flex; gap:6px; margin-bottom:6px;">
+      <!-- Crimson column -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <div style="font-size:7px;color:#ff4444;text-align:center;margin-bottom:1px;">CRIMSON</div>
+        <div style="height:9px;background:#8b0000;border:1px solid #cc0000;border-radius:1px;"></div>
+        <div style="height:9px;background:#8b0000;border:1px solid #cc0000;border-radius:1px;"></div>
+        <div style="height:9px;background:#660000;border:1px solid #990000;border-radius:1px;"></div>
+        <div style="height:9px;background:#8b0000;border:1px solid #cc0000;border-radius:1px;"></div>
+        <div style="height:9px;background:#8b0000;border:1px solid #cc0000;border-radius:1px;"></div>
+        <div style="height:9px;background:#660000;border:1px solid #880000;border-radius:1px;"></div>
+        <div style="height:9px;background:#660000;border:1px solid #880000;border-radius:1px;"></div>
+      </div>
+      <!-- Obsidian column -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <div style="font-size:7px;color:#999;text-align:center;margin-bottom:1px;">OBSIDIAN</div>
+        <div style="height:9px;background:#333;border:1px solid #666;border-radius:1px;"></div>
+        <div style="height:9px;background:#333;border:1px solid #666;border-radius:1px;"></div>
+        <div style="height:9px;background:#222;border:1px solid #444;border-radius:1px;"></div>
+        <div style="height:9px;background:#333;border:1px solid #555;border-radius:1px;"></div>
+        <div style="height:9px;background:#333;border:1px solid #555;border-radius:1px;"></div>
+        <div style="height:9px;background:#222;border:1px solid #444;border-radius:1px;"></div>
+        <div style="height:9px;background:#222;border:1px solid #444;border-radius:1px;"></div>
+        <div style="height:9px;background:#1a1a1a;border:1px solid #333;border-radius:1px;"></div>
+        <div style="height:9px;background:#1a1a1a;border:1px solid #333;border-radius:1px;"></div>
+      </div>
+      <!-- Ivory column -->
+      <div style="flex:1; display:flex; flex-direction:column; gap:2px;">
+        <div style="font-size:7px;color:#e8d898;text-align:center;margin-bottom:1px;">IVORY</div>
+        <div style="height:9px;background:#b8a060;border:1px solid #d8c080;border-radius:1px;"></div>
+        <div style="height:9px;background:#b8a060;border:1px solid #d8c080;border-radius:1px;"></div>
+        <div style="height:9px;background:#a08840;border:1px solid #c0a860;border-radius:1px;"></div>
+        <div style="height:9px;background:#b8a060;border:1px solid #d8c080;border-radius:1px;"></div>
+        <div style="height:9px;background:#b8a060;border:1px solid #d8c080;border-radius:1px;"></div>
+      </div>
+    </div>
+
+    <!-- Play field gap -->
+    <div style="height: 50px; background:#050a05; position:relative;">
+      <!-- Ball -->
+      <div style="width:7px;height:7px;background:#00ff41;border-radius:50%;box-shadow:0 0 4px #00ff41;position:absolute;top:18px;left:calc(50% - 3px);"></div>
+    </div>
+
+    <!-- Paddle -->
+    <div style="padding: 0 8px 10px;">
+      <div style="display:flex;justify-content:center;">
+        <div style="width:60px;height:8px;background:linear-gradient(180deg,#00ff41,#007a20);border-radius:4px;box-shadow:0 0 6px #00ff4166;"></div>
+      </div>
+    </div>
+
+    <!-- Note about columns -->
+    <div style="background:#0a0f0a;border-top:1px solid #1a2a1a;padding:8px;font-size:10px;color:#556655;text-align:center;">
+      Obsidian has <em>more blocks</em> (harder to break = more spread-out blocks)<br>
+      Ivory has <em>fewer blocks</em> (tank build = easier shell but spaced out)<br>
+      Crimson has <em>denser blocks</em> (high resistance = packed tightly)
+    </div>
+  </div>
+</div>
+
+<div style="margin-top: 1.5rem;">
+  <h3>Key design decisions this raises:</h3>
+  <div class="options">
+    <div class="option" data-choice="block-count" onclick="toggleSelect(this)">
+      <div class="letter">Q1</div>
+      <div class="content">
+        <h3>Should each egg's block column have a different block count / durability?</h3>
+        <p>E.g. Obsidian = most blocks (dense, hard to crack), Crimson = medium+packed, Ivory = fewest but spread out. This gives each egg a distinct "feel" without changing the core Breakout mechanic.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="warmth" onclick="toggleSelect(this)">
+      <div class="letter">Q2</div>
+      <div class="content">
+        <h3>Keep the "warmth particles fall to egg" visual idea?</h3>
+        <p>The spec says broken blocks release warmth particles that drift down to the egg below. This is a nice visual that ties block-breaking to egg progress. Worth keeping as a juice/feedback element.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="direct-hit" onclick="toggleSelect(this)">
+      <div class="letter">Q3</div>
+      <div class="content">
+        <h3>Keep the "direct hit on egg" as the final win condition?</h3>
+        <p>The spec requires: clear all your egg's blocks AND then hit the egg directly to hatch it. This two-step win gives a satisfying "finishing blow" moment. Or: auto-hatch when all blocks clear?</p>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="subtitle">Click any Q that feels unresolved, or tell me in the terminal.</p>
